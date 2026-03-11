@@ -1,0 +1,166 @@
+{
+  "project_name": "White Label QR Menu & KDS",
+  "design_philosophy": {
+    "identity": "E1 Anti-AI Designer",
+    "core_principles": [
+      "Fusion: Magazine Aesthetic (Mobile) + Cockpit Utility (KDS)",
+      "Emotion: Appetite Appeal (Mobile) vs Calm Efficiency (KDS)",
+      "Typography: Serif for flavor, Mono for data",
+      "Layout: Thumb-driven (Mobile) vs Eye-scan-driven (KDS)"
+    ],
+    "anti_patterns": [
+      "No generic 'SaaS Blue' for buttons",
+      "No boring list views without images",
+      "No hidden prices",
+      "No stark white backgrounds (#FFFFFF) - use Bone/Cream"
+    ]
+  },
+  "typography": {
+    "font_families": {
+      "headings": "Playfair Display, serif",
+      "body": "DM Sans, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "installation": {
+      "google_fonts_url": "https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;500;700&family=JetBrains+Mono:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+    },
+    "usage_rules": {
+      "h1_hero": "font-serif text-4xl md:text-6xl font-medium tracking-tight leading-none",
+      "h2_section": "font-serif text-2xl md:text-3xl font-normal tracking-tight text-primary",
+      "h3_item": "font-sans text-lg font-bold text-foreground",
+      "body_text": "font-sans text-base leading-relaxed text-muted-foreground",
+      "price": "font-mono text-lg font-medium text-primary",
+      "kds_timer": "font-mono text-2xl font-bold tracking-widest"
+    }
+  },
+  "colors": {
+    "theme_strategy": "hybrid",
+    "modes": {
+      "customer_app": "light_mode_default",
+      "kds": "dark_mode_forced"
+    },
+    "palettes": {
+      "light": {
+        "background": "#F9F9F7",
+        "foreground": "#1c1917",
+        "card": "#FFFFFF",
+        "card_foreground": "#1c1917",
+        "primary": "#5A6B5D",
+        "primary_foreground": "#FFFFFF",
+        "secondary": "#E8E6E1",
+        "secondary_foreground": "#44403C",
+        "muted": "#F2F0EB",
+        "muted_foreground": "#78716C",
+        "accent": "#D6D3CD",
+        "border": "#E7E5E4",
+        "input": "#E7E5E4",
+        "ring": "#5A6B5D"
+      },
+      "dark": {
+        "background": "#0F172A",
+        "foreground": "#F8FAFC",
+        "card": "#1E293B",
+        "card_foreground": "#F8FAFC",
+        "primary": "#38BDF8",
+        "primary_foreground": "#0F172A",
+        "secondary": "#334155",
+        "secondary_foreground": "#F8FAFC",
+        "muted": "#1E293B",
+        "muted_foreground": "#94A3B8",
+        "accent": "#1E293B",
+        "border": "#334155",
+        "input": "#334155",
+        "ring": "#38BDF8"
+      }
+    },
+    "status_colors": {
+      "success": "#22C55E",
+      "warning": "#EAB308",
+      "error": "#EF4444",
+      "info": "#3B82F6",
+      "kds_new": "#3B82F6",
+      "kds_preparing": "#EAB308",
+      "kds_ready": "#22C55E",
+      "kds_late": "#EF4444"
+    }
+  },
+  "spacing_and_layout": {
+    "spacing_scale": "fluid",
+    "container_padding": {
+      "mobile": "px-4 py-6",
+      "desktop": "px-8 py-12"
+    },
+    "border_radius": {
+      "default": "rounded-lg",
+      "button": "rounded-full",
+      "card_kds": "rounded-sm",
+      "image": "rounded-md"
+    },
+    "grids": {
+      "menu_grid": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6",
+      "kds_grid": "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-primary text-primary-foreground hover:bg-primary/90 h-12 px-8 rounded-full font-medium transition-transform active:scale-95 shadow-lg",
+      "secondary": "bg-secondary text-secondary-foreground hover:bg-secondary/80 h-12 px-6 rounded-full font-medium",
+      "outline": "border-2 border-primary text-primary hover:bg-primary/5 h-12 px-6 rounded-full font-medium",
+      "kds_action": "h-14 w-full rounded-none font-mono font-bold uppercase tracking-widest"
+    },
+    "cards": {
+      "menu_item": "group relative overflow-hidden bg-card border border-transparent hover:border-border transition-all duration-300 hover:shadow-xl rounded-xl",
+      "kds_ticket": "bg-card border-l-4 flex flex-col h-full rounded-r-md shadow-sm"
+    },
+    "navigation": {
+      "mobile_bottom_bar": "fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-xl border-t border-border p-4 z-50 pb-safe",
+      "kds_header": "bg-slate-900 border-b border-slate-800 p-4 flex justify-between items-center text-white"
+    }
+  },
+  "visual_enhancers": {
+    "shadows": {
+      "soft": "0 4px 20px -2px rgba(0, 0, 0, 0.05)",
+      "floating": "0 10px 40px -10px rgba(0, 0, 0, 0.1)",
+      "kds_glow": "0 0 10px rgba(56, 189, 248, 0.2)"
+    },
+    "textures": {
+      "noise": "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E\")"
+    }
+  },
+  "image_assets": {
+    "strategy": "High-fidelity food photography. Warm lighting. Close-ups.",
+    "categories": {
+      "burgers": "https://images.unsplash.com/photo-1762922425249-144c3bb9167e?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "pizza": "https://images.unsplash.com/photo-1751200884901-c1c6f43ae1d6?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "sushi": "https://images.unsplash.com/photo-1770966666358-37668256a29f?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "cocktails": "https://images.pexels.com/photos/29095938/pexels-photo-29095938.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "hero_bg": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+      "placeholder": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+    }
+  },
+  "accessibility": {
+    "contrast_check": "Ensure text overlay on food images has a 'bg-black/40' scrim or gradient.",
+    "touch_targets": "Minimum 44px for all mobile interactive elements.",
+    "kds_readability": "High contrast text for kitchen environments (smoke, grease, distance)."
+  },
+  "universal_guidelines_for_main_agent": [
+    "Do not use gradients for the KDS background, use solid dark colors.",
+    "For the Customer App, use the 'Sage Green' (#5A6B5D) as the primary brand color by default.",
+    "Implement 'Sonner' for all toast notifications (Order placed, Kitchen updates).",
+    "Use 'Framer Motion' for the mobile menu: Staggered list entrance, shared layout transition for category switching.",
+    "KDS tickets must have a 'Time Elapsed' counter that changes color (Green -> Yellow -> Red) as time passes.",
+    "Never use 'Inter' for Headings. Use 'Playfair Display'.",
+    "For mobile inputs (modifiers), use bottom sheets (Drawers) instead of center modals.",
+    "All images must have alt text describing the food.",
+    "Use lucide-react for icons.",
+    "Add 'data-testid' to all buttons and inputs."
+  ],
+  "instructions_to_main_agent": {
+    "step_1": "Update tailwind.config.js with the new color palette (Light for App, Dark for KDS) and fonts.",
+    "step_2": "Install fonts via index.css import.",
+    "step_3": "Create a 'Layout' component that handles the switching between 'Customer Theme' and 'Kitchen Theme' based on the route.",
+    "step_4": "Build the 'MenuCategory' component as a horizontal scrollable pill list.",
+    "step_5": "Build the 'MenuItem' component with the image taking up the top half (or left side on desktop) and proper typography.",
+    "step_6": "Implement the KDS board using a CSS Grid that auto-fills based on screen width."
+  }
+}
