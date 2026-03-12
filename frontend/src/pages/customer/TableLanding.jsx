@@ -135,6 +135,13 @@ export default function TableLanding() {
       >
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative h-full flex flex-col items-center justify-center text-center px-6">
+          {settings.logo_url && (
+            <img 
+              src={settings.logo_url} 
+              alt={settings.name} 
+              className="h-16 w-auto object-contain mb-6 animate-fade-in"
+            />
+          )}
           <h1 className="font-serif text-5xl md:text-6xl font-medium text-white mb-4 animate-slide-up">
             {settings.name}
           </h1>

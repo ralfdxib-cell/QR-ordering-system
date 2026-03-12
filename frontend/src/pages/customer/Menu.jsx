@@ -128,9 +128,18 @@ export default function Menu() {
       <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md border-b border-border">
         <div className="px-4 py-4">
           <div className="flex items-center justify-between mb-1">
-            <h1 className="font-serif text-2xl font-medium text-foreground">
-              {settings.name}
-            </h1>
+            <div className="flex items-center gap-3">
+              {settings.logo_url && (
+                <img 
+                  src={settings.logo_url} 
+                  alt={settings.name} 
+                  className="h-8 w-auto object-contain"
+                />
+              )}
+              <h1 className="font-serif text-2xl font-medium text-foreground">
+                {settings.name}
+              </h1>
+            </div>
             {table && (
               <Badge variant="secondary" className="font-mono">
                 Tafel {table.table_number}
