@@ -7,6 +7,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/ca
 import { Badge } from '../../components/ui/badge';
 import { Loader2, TrendingUp, ShoppingCart, UtensilsCrossed, Grid3X3 } from 'lucide-react';
 
+// Dutch status labels
+const statusLabelsNL = {
+  new: 'Nieuw',
+  preparing: 'In Bereiding',
+  ready: 'Klaar',
+  served: 'Geserveerd',
+  cancelled: 'Geannuleerd',
+};
+
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const { settings } = useSettings();
@@ -70,32 +79,32 @@ export default function AdminDashboard() {
       {/* Header */}
       <div>
         <h1 className="font-serif text-3xl font-medium text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back to {settings.name}</p>
+        <p className="text-muted-foreground">Welkom terug bij {settings.name}</p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/admin/orders')}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Active Orders</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Actieve Bestellingen</CardTitle>
             <ShoppingCart className="w-4 h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-foreground">{stats.activeOrders}</div>
-            <p className="text-xs text-muted-foreground">{stats.totalOrders} total orders</p>
+            <p className="text-xs text-muted-foreground">{stats.totalOrders} totaal bestellingen</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Revenue</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Omzet</CardTitle>
             <TrendingUp className="w-4 h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold font-mono text-foreground">
               {formatCurrency(stats.totalRevenue, settings.currency_symbol)}
             </div>
-            <p className="text-xs text-muted-foreground">From served orders</p>
+            <p className="text-xs text-muted-foreground">Van geserveerde bestellingen</p>
           </CardContent>
         </Card>
 
@@ -106,18 +115,18 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-foreground">{stats.menuItems}</div>
-            <p className="text-xs text-muted-foreground">{stats.categories} categories</p>
+            <p className="text-xs text-muted-foreground">{stats.categories} categorieën</p>
           </CardContent>
         </Card>
 
         <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/admin/tables')}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Tables</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Tafels</CardTitle>
             <Grid3X3 className="w-4 h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-foreground">{stats.tables}</div>
-            <p className="text-xs text-muted-foreground">Active tables</p>
+            <p className="text-xs text-muted-foreground">Actieve tafels</p>
           </CardContent>
         </Card>
       </div>
@@ -125,18 +134,18 @@ export default function AdminDashboard() {
       {/* Recent Orders */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-lg font-medium">Recent Orders</CardTitle>
+          <CardTitle className="text-lg font-medium">Recente Bestellingen</CardTitle>
           <button
             onClick={() => navigate('/admin/orders')}
             className="text-sm text-primary hover:underline"
             data-testid="view-all-orders-btn"
           >
-            View All
+            Alles Bekijken
           </button>
         </CardHeader>
         <CardContent>
           {recentOrders.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">No orders yet</p>
+            <p className="text-muted-foreground text-center py-8">Nog geen bestellingen</p>
           ) : (
             <div className="space-y-4">
               {recentOrders.map((order) => {
@@ -155,7 +164,7 @@ export default function AdminDashboard() {
                       </div>
                       <div>
                         <p className="font-medium text-foreground">
-                          Table {order.table_number}
+                          Tafel {order.table_number}
                           {order.customer_name && ` - ${order.customer_name}`}
                         </p>
                         <p className="text-sm text-muted-foreground">
@@ -164,7 +173,7 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                     <Badge className={statusConfig?.color}>
-                      {statusConfig?.label || order.status}
+                      {statusLabelsNL[order.status] || statusConfig?.label || order.status}
                     </Badge>
                   </div>
                 );

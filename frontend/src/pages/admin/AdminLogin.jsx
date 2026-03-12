@@ -29,7 +29,7 @@ export default function AdminLogin() {
         });
         localStorage.setItem('admin_token', response.data.token);
         localStorage.setItem('admin_user', JSON.stringify(response.data.admin));
-        toast.success('Welcome back!');
+        toast.success('Welkom terug!');
         navigate('/admin');
       } else {
         const response = await authAPI.register({
@@ -39,12 +39,12 @@ export default function AdminLogin() {
         });
         localStorage.setItem('admin_token', response.data.token);
         localStorage.setItem('admin_user', JSON.stringify(response.data.admin));
-        toast.success('Account created successfully!');
+        toast.success('Account succesvol aangemaakt!');
         navigate('/admin');
       }
     } catch (error) {
       console.error('Auth error:', error);
-      toast.error(error.response?.data?.detail || 'Authentication failed');
+      toast.error(error.response?.data?.detail || 'Authenticatie mislukt');
     } finally {
       setLoading(false);
     }
@@ -60,7 +60,7 @@ export default function AdminLogin() {
           data-testid="back-home-btn"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Home
+          Terug naar Home
         </button>
       </div>
 
@@ -73,12 +73,12 @@ export default function AdminLogin() {
               <UtensilsCrossed className="w-8 h-8 text-primary" />
             </div>
             <h1 className="font-serif text-3xl font-medium text-foreground">
-              {isLogin ? 'Admin Login' : 'Create Account'}
+              {isLogin ? 'Beheerder Login' : 'Account Aanmaken'}
             </h1>
             <p className="text-muted-foreground mt-2">
               {isLogin 
-                ? 'Sign in to manage your restaurant' 
-                : 'Set up your restaurant dashboard'}
+                ? 'Log in om uw restaurant te beheren' 
+                : 'Stel uw restaurant dashboard in'}
             </p>
           </div>
 
@@ -86,11 +86,11 @@ export default function AdminLogin() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {!isLogin && (
               <div className="space-y-2">
-                <Label htmlFor="name">Restaurant Name</Label>
+                <Label htmlFor="name">Restaurant Naam</Label>
                 <Input
                   id="name"
                   type="text"
-                  placeholder="Enter restaurant name"
+                  placeholder="Voer restaurant naam in"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required={!isLogin}
@@ -101,11 +101,11 @@ export default function AdminLogin() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">E-mail</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@restaurant.com"
+                placeholder="admin@restaurant.nl"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
@@ -115,7 +115,7 @@ export default function AdminLogin() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Wachtwoord</Label>
               <Input
                 id="password"
                 type="password"
@@ -138,10 +138,10 @@ export default function AdminLogin() {
               {loading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                  {isLogin ? 'Signing in...' : 'Creating account...'}
+                  {isLogin ? 'Inloggen...' : 'Account aanmaken...'}
                 </>
               ) : (
-                isLogin ? 'Sign In' : 'Create Account'
+                isLogin ? 'Inloggen' : 'Account Aanmaken'
               )}
             </Button>
           </form>
@@ -155,8 +155,8 @@ export default function AdminLogin() {
               data-testid="toggle-auth-btn"
             >
               {isLogin 
-                ? "Don't have an account? Sign up" 
-                : 'Already have an account? Sign in'}
+                ? "Nog geen account? Registreer" 
+                : 'Al een account? Log in'}
             </button>
           </div>
         </div>

@@ -20,12 +20,12 @@ export default function Cart() {
 
   const handlePlaceOrder = async () => {
     if (!table) {
-      toast.error('Please scan a table QR code first');
+      toast.error('Scan eerst een tafel QR-code');
       return;
     }
 
     if (cart.length === 0) {
-      toast.error('Your cart is empty');
+      toast.error('Uw winkelwagen is leeg');
       return;
     }
 
@@ -50,11 +50,11 @@ export default function Cart() {
 
       const response = await orderAPI.create(orderData);
       clearCart();
-      toast.success('Order placed successfully!');
+      toast.success('Bestelling succesvol geplaatst!');
       navigate(`/order/${response.data.id}`);
     } catch (error) {
       console.error('Error placing order:', error);
-      toast.error('Failed to place order. Please try again.');
+      toast.error('Bestelling mislukt. Probeer het opnieuw.');
     } finally {
       setLoading(false);
     }
@@ -75,7 +75,7 @@ export default function Cart() {
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <h1 className="font-serif text-2xl font-medium text-foreground">Your Cart</h1>
+            <h1 className="font-serif text-2xl font-medium text-foreground">Uw Winkelwagen</h1>
           </div>
         </div>
 
@@ -85,17 +85,17 @@ export default function Cart() {
             <ShoppingCart className="w-10 h-10 text-muted-foreground" />
           </div>
           <h2 className="font-serif text-2xl font-medium text-foreground mb-2">
-            Your cart is empty
+            Uw winkelwagen is leeg
           </h2>
           <p className="text-muted-foreground mb-6">
-            Add some delicious items from our menu
+            Voeg heerlijke items toe vanuit ons menu
           </p>
           <Button
             onClick={() => navigate('/menu')}
             className="rounded-full px-8"
             data-testid="browse-menu-btn"
           >
-            Browse Menu
+            Menu Bekijken
           </Button>
         </div>
       </div>
@@ -115,7 +115,7 @@ export default function Cart() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="flex-1">
-            <h1 className="font-serif text-2xl font-medium text-foreground">Your Cart</h1>
+            <h1 className="font-serif text-2xl font-medium text-foreground">Uw Winkelwagen</h1>
             <p className="text-sm text-muted-foreground">{cart.length} items</p>
           </div>
         </div>
@@ -205,9 +205,9 @@ export default function Cart() {
       {/* Order Details */}
       <div className="px-4 space-y-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium text-foreground">Your Name (optional)</label>
+          <label className="text-sm font-medium text-foreground">Uw Naam (optioneel)</label>
           <Input
-            placeholder="Enter your name"
+            placeholder="Voer uw naam in"
             value={customerName}
             onChange={(e) => setCustomerName(e.target.value)}
             className="rounded-lg"
@@ -215,9 +215,9 @@ export default function Cart() {
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium text-foreground">Special Requests (optional)</label>
+          <label className="text-sm font-medium text-foreground">Speciale Verzoeken (optioneel)</label>
           <Textarea
-            placeholder="Any additional notes for your order?"
+            placeholder="Extra opmerkingen voor uw bestelling?"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             className="resize-none rounded-lg"
@@ -231,11 +231,11 @@ export default function Cart() {
       <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4 pb-safe z-40">
         <div className="space-y-3 mb-4">
           <div className="flex justify-between text-muted-foreground">
-            <span>Subtotal</span>
+            <span>Subtotaal</span>
             <span>{formatCurrency(cartTotal, settings.currency_symbol)}</span>
           </div>
           <div className="flex justify-between font-bold text-lg text-foreground">
-            <span>Total</span>
+            <span>Totaal</span>
             <span className="font-mono">{formatCurrency(cartTotal, settings.currency_symbol)}</span>
           </div>
         </div>
@@ -248,15 +248,15 @@ export default function Cart() {
           {loading ? (
             <>
               <Loader2 className="w-5 h-5 animate-spin mr-2" />
-              Placing Order...
+              Bestelling Plaatsen...
             </>
           ) : (
-            'Place Order'
+            'Bestelling Plaatsen'
           )}
         </Button>
         {!table && (
           <p className="text-xs text-destructive text-center mt-2">
-            Please scan a table QR code to place your order
+            Scan eerst een tafel QR-code om te bestellen
           </p>
         )}
       </div>

@@ -12,6 +12,16 @@ import { Textarea } from '../../components/ui/textarea';
 import { ScrollArea } from '../../components/ui/scroll-area';
 import { ShoppingCart, Plus, Minus, Loader2, UtensilsCrossed, X } from 'lucide-react';
 
+// Dutch dietary tag labels
+const dietaryTagLabelsNL = {
+  vegetarian: 'Vegetarisch',
+  vegan: 'Veganistisch',
+  'gluten-free': 'Glutenvrij',
+  seafood: 'Zeevruchten',
+  spicy: 'Pittig',
+  nuts: 'Bevat Noten',
+};
+
 export default function Menu() {
   const navigate = useNavigate();
   const { table, cart, addToCart, getCartCount, getCartTotal } = useCart();
@@ -44,7 +54,6 @@ export default function Menu() {
         categoryAPI.getAll(),
       ]);
       setCategories(catResponse.data);
-      // Fetch all items initially
       const itemsResponse = await menuItemAPI.getAll();
       setMenuItems(itemsResponse.data);
     } catch (error) {
@@ -77,15 +86,11 @@ export default function Menu() {
       const hasOption = groupModifiers.some(m => m.id === option.id);
 
       if (hasOption) {
-        // Remove option
         return prev.filter(m => !(m.groupId === groupId && m.id === option.id));
       } else {
-        // Add option (respect max selections)
         if (maxSelections === 1) {
-          // Single selection - replace existing
           return [...prev.filter(m => m.groupId !== groupId), { ...option, groupId }];
         } else if (groupModifiers.length < maxSelections) {
-          // Multi selection - add if under limit
           return [...prev, { ...option, groupId }];
         }
         return prev;
@@ -128,11 +133,11 @@ export default function Menu() {
             </h1>
             {table && (
               <Badge variant="secondary" className="font-mono">
-                Table {table.table_number}
+                Tafel {table.table_number}
               </Badge>
             )}
           </div>
-          <p className="text-sm text-muted-foreground">Browse our menu</p>
+          <p className="text-sm text-muted-foreground">Bekijk ons menu</p>
         </div>
 
         {/* Category Pills */}
@@ -146,7 +151,7 @@ export default function Menu() {
             }`}
             data-testid="category-all"
           >
-            All
+            Alles
           </button>
           {categories.map((cat) => (
             <button
@@ -170,7 +175,7 @@ export default function Menu() {
         {menuItems.length === 0 ? (
           <div className="text-center py-12">
             <UtensilsCrossed className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">No items available in this category</p>
+            <p className="text-muted-foreground">Geen items beschikbaar in deze categorie</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -195,7 +200,6 @@ export default function Menu() {
                       <UtensilsCrossed className="w-12 h-12 text-muted-foreground" />
                     </div>
                   )}
-                  {/* Overlay on hover */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                       <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
@@ -230,7 +234,7 @@ export default function Menu() {
                             key={tag}
                             className={`dietary-badge ${tagConfig.color}`}
                           >
-                            {tagConfig.label}
+                            {dietaryTagLabelsNL[tag] || tagConfig.label}
                           </span>
                         ) : null;
                       })}
@@ -312,13 +316,13 @@ export default function Menu() {
                             {group.name}
                           </h4>
                           {group.required && (
-                            <Badge variant="destructive" className="text-xs">Required</Badge>
+                            <Badge variant="destructive" className="text-xs">Verplicht</Badge>
                           )}
                         </div>
                         <p className="text-xs text-muted-foreground">
                           {group.max_selections === 1 
-                            ? 'Select one' 
-                            : `Select up to ${group.max_selections}`}
+                            ? 'Kies één' 
+                            : `Kies maximaal ${group.max_selections}`}
                         </p>
                         <div className="space-y-2">
                           {group.options.map((option) => {
@@ -356,9 +360,9 @@ export default function Menu() {
 
                 {/* Special Instructions */}
                 <div className="space-y-2 pb-4">
-                  <h4 className="font-sans font-semibold text-foreground">Special Instructions</h4>
+                  <h4 className="font-sans font-semibold text-foreground">Speciale Instructies</h4>
                   <Textarea
-                    placeholder="Any allergies or special requests?"
+                    placeholder="Allergieën of speciale verzoeken?"
                     value={specialInstructions}
                     onChange={(e) => setSpecialInstructions(e.target.value)}
                     className="resize-none"
@@ -393,7 +397,7 @@ export default function Menu() {
                   className="w-full h-14 rounded-full text-lg"
                   data-testid="add-to-cart-btn"
                 >
-                  Add to Cart - {formatCurrency(calculateItemTotal(), settings.currency_symbol)}
+                  Toevoegen - {formatCurrency(calculateItemTotal(), settings.currency_symbol)}
                 </Button>
               </DrawerFooter>
             </>

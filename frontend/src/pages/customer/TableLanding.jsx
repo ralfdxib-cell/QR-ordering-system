@@ -28,31 +28,11 @@ export default function TableLanding() {
       const response = await tableAPI.getByQR(qrCode);
       setTable(response.data);
       setCurrentTable(response.data);
-      // Auto-navigate to menu after a brief delay
       setTimeout(() => {
         navigate('/menu');
       }, 2000);
     } catch (err) {
-      setError('Table not found. Please scan a valid QR code.');
-      setLoading(false);
-    }
-  };
-
-  const handleSeedData = async () => {
-    try {
-      setLoading(true);
-      await seedAPI.seed();
-      // Fetch tables after seeding
-      const tablesResponse = await tableAPI.getAll();
-      if (tablesResponse.data.length > 0) {
-        const firstTable = tablesResponse.data[0];
-        setTable(firstTable);
-        setCurrentTable(firstTable);
-        navigate('/menu');
-      }
-    } catch (err) {
-      console.error('Error seeding data:', err);
-    } finally {
+      setError('Tafel niet gevonden. Scan een geldige QR-code.');
       setLoading(false);
     }
   };
@@ -60,9 +40,7 @@ export default function TableLanding() {
   const handleDemoMode = async () => {
     try {
       setLoading(true);
-      // First try to seed data
       await seedAPI.seed();
-      // Then fetch available tables
       const tablesResponse = await tableAPI.getAll();
       if (tablesResponse.data.length > 0) {
         const firstTable = tablesResponse.data[0];
@@ -72,13 +50,12 @@ export default function TableLanding() {
       }
     } catch (err) {
       console.error('Error entering demo mode:', err);
-      setError('Failed to start demo mode. Please try again.');
+      setError('Demo modus kon niet worden gestart. Probeer het opnieuw.');
     } finally {
       setLoading(false);
     }
   };
 
-  // If QR code found and loading table
   if (qrCode && loading) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
@@ -88,10 +65,10 @@ export default function TableLanding() {
           </div>
           <div>
             <h1 className="font-serif text-3xl font-medium text-foreground mb-2">
-              Finding your table...
+              Tafel zoeken...
             </h1>
             <p className="text-muted-foreground">
-              Please wait while we prepare your menu
+              Even geduld terwijl we het menu voorbereiden
             </p>
           </div>
         </div>
@@ -99,7 +76,6 @@ export default function TableLanding() {
     );
   }
 
-  // If table found, show welcome
   if (table) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
@@ -109,21 +85,20 @@ export default function TableLanding() {
           </div>
           <div>
             <h1 className="font-serif text-4xl font-medium text-foreground mb-2">
-              Welcome to {settings.name}!
+              Welkom bij {settings.name}!
             </h1>
             <p className="text-xl text-muted-foreground">
-              You're seated at <span className="font-semibold text-foreground">Table {table.table_number}</span>
+              U zit aan <span className="font-semibold text-foreground">Tafel {table.table_number}</span>
             </p>
           </div>
           <p className="text-sm text-muted-foreground">
-            Redirecting to menu...
+            Doorsturen naar menu...
           </p>
         </div>
       </div>
     );
   }
 
-  // If error
   if (error) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
@@ -133,7 +108,7 @@ export default function TableLanding() {
           </div>
           <div>
             <h1 className="font-serif text-3xl font-medium text-foreground mb-2">
-              Oops!
+              Oeps!
             </h1>
             <p className="text-muted-foreground">{error}</p>
           </div>
@@ -142,14 +117,13 @@ export default function TableLanding() {
             className="rounded-full px-8"
             data-testid="go-home-btn"
           >
-            Go Home
+            Naar Home
           </Button>
         </div>
       </div>
     );
   }
 
-  // Landing page (no QR code)
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -165,7 +139,7 @@ export default function TableLanding() {
             {settings.name}
           </h1>
           <p className="text-lg text-white/80 max-w-md animate-fade-in">
-            Scan the QR code on your table to view our menu and place your order
+            Scan de QR-code op uw tafel om het menu te bekijken en te bestellen
           </p>
         </div>
       </div>
@@ -177,20 +151,20 @@ export default function TableLanding() {
             <UtensilsCrossed className="w-8 h-8 text-primary" />
           </div>
           <h2 className="font-serif text-2xl font-medium text-foreground">
-            How to Order
+            Hoe Bestellen
           </h2>
           <div className="space-y-3 text-muted-foreground">
-            <p>1. Scan the QR code on your table</p>
-            <p>2. Browse our delicious menu</p>
-            <p>3. Add items to your cart</p>
-            <p>4. Place your order</p>
-            <p>5. Pay at the counter when ready</p>
+            <p>1. Scan de QR-code op uw tafel</p>
+            <p>2. Bekijk ons heerlijke menu</p>
+            <p>3. Voeg items toe aan uw winkelwagen</p>
+            <p>4. Plaats uw bestelling</p>
+            <p>5. Betaal bij de kassa wanneer klaar</p>
           </div>
         </div>
 
         <div className="pt-6 border-t border-border space-y-4">
           <p className="text-sm text-muted-foreground">
-            For demo purposes, you can start ordering without scanning:
+            Voor demonstratiedoeleinden kunt u zonder scannen bestellen:
           </p>
           <Button 
             onClick={handleDemoMode}
@@ -204,13 +178,13 @@ export default function TableLanding() {
             ) : (
               <Sparkles className="w-4 h-4" />
             )}
-            Try Demo Mode
+            Demo Modus Starten
           </Button>
         </div>
 
         <div className="pt-6 border-t border-border space-y-4">
           <p className="text-sm text-muted-foreground">
-            Restaurant owner? Access the admin panel:
+            Restauranteigenaar? Open het beheerpaneel:
           </p>
           <div className="flex gap-3 justify-center">
             <Button 
@@ -219,7 +193,7 @@ export default function TableLanding() {
               className="rounded-full"
               data-testid="admin-login-btn"
             >
-              Admin Login
+              Beheerder Login
             </Button>
             <Button 
               variant="outline"
@@ -227,7 +201,7 @@ export default function TableLanding() {
               className="rounded-full"
               data-testid="kitchen-btn"
             >
-              Kitchen Display
+              Keuken Display
             </Button>
           </div>
         </div>

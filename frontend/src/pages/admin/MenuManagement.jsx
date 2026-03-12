@@ -23,6 +23,16 @@ import {
   ImageIcon
 } from 'lucide-react';
 
+// Dutch dietary tag labels
+const dietaryTagLabelsNL = {
+  vegetarian: 'Vegetarisch',
+  vegan: 'Veganistisch',
+  'gluten-free': 'Glutenvrij',
+  seafood: 'Zeevruchten',
+  spicy: 'Pittig',
+  nuts: 'Bevat Noten',
+};
+
 export default function MenuManagement() {
   const { settings } = useSettings();
   const [categories, setCategories] = useState([]);
@@ -68,7 +78,7 @@ export default function MenuManagement() {
       setMenuItems(itemsRes.data);
     } catch (error) {
       console.error('Error fetching data:', error);
-      toast.error('Failed to load menu data');
+      toast.error('Menu data laden mislukt');
     } finally {
       setLoading(false);
     }
@@ -95,26 +105,26 @@ export default function MenuManagement() {
     try {
       if (editingCategory) {
         await categoryAPI.update(editingCategory.id, categoryForm);
-        toast.success('Category updated');
+        toast.success('Categorie bijgewerkt');
       } else {
         await categoryAPI.create(categoryForm);
-        toast.success('Category created');
+        toast.success('Categorie aangemaakt');
       }
       setCategoryModalOpen(false);
       fetchData();
     } catch (error) {
-      toast.error('Failed to save category');
+      toast.error('Categorie opslaan mislukt');
     }
   };
 
   const handleDeleteCategory = async (id) => {
-    if (!window.confirm('Delete this category and all its items?')) return;
+    if (!window.confirm('Deze categorie en alle items verwijderen?')) return;
     try {
       await categoryAPI.delete(id);
-      toast.success('Category deleted');
+      toast.success('Categorie verwijderd');
       fetchData();
     } catch (error) {
-      toast.error('Failed to delete category');
+      toast.error('Categorie verwijderen mislukt');
     }
   };
 
@@ -157,26 +167,26 @@ export default function MenuManagement() {
       
       if (editingItem) {
         await menuItemAPI.update(editingItem.id, data);
-        toast.success('Item updated');
+        toast.success('Item bijgewerkt');
       } else {
         await menuItemAPI.create(data);
-        toast.success('Item created');
+        toast.success('Item aangemaakt');
       }
       setItemModalOpen(false);
       fetchData();
     } catch (error) {
-      toast.error('Failed to save item');
+      toast.error('Item opslaan mislukt');
     }
   };
 
   const handleDeleteItem = async (id) => {
-    if (!window.confirm('Delete this menu item?')) return;
+    if (!window.confirm('Dit menu item verwijderen?')) return;
     try {
       await menuItemAPI.delete(id);
-      toast.success('Item deleted');
+      toast.success('Item verwijderd');
       fetchData();
     } catch (error) {
-      toast.error('Failed to delete item');
+      toast.error('Item verwijderen mislukt');
     }
   };
 
@@ -184,9 +194,9 @@ export default function MenuManagement() {
     try {
       await menuItemAPI.update(item.id, { is_available: !item.is_available });
       fetchData();
-      toast.success(`Item ${!item.is_available ? 'enabled' : 'disabled'}`);
+      toast.success(`Item ${!item.is_available ? 'ingeschakeld' : 'uitgeschakeld'}`);
     } catch (error) {
-      toast.error('Failed to update item');
+      toast.error('Item bijwerken mislukt');
     }
   };
 
@@ -216,8 +226,8 @@ export default function MenuManagement() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-serif text-3xl font-medium text-foreground">Menu Management</h1>
-          <p className="text-muted-foreground">Manage your categories and menu items</p>
+          <h1 className="font-serif text-3xl font-medium text-foreground">Menu Beheer</h1>
+          <p className="text-muted-foreground">Beheer uw categorieën en menu items</p>
         </div>
       </div>
 
@@ -225,7 +235,7 @@ export default function MenuManagement() {
         <TabsList>
           <TabsTrigger value="categories" data-testid="tab-categories">
             <FolderOpen className="w-4 h-4 mr-2" />
-            Categories ({categories.length})
+            Categorieën ({categories.length})
           </TabsTrigger>
           <TabsTrigger value="items" data-testid="tab-items">
             <UtensilsCrossed className="w-4 h-4 mr-2" />
@@ -238,7 +248,7 @@ export default function MenuManagement() {
           <div className="flex justify-end mb-4">
             <Button onClick={() => openCategoryModal()} data-testid="add-category-btn">
               <Plus className="w-4 h-4 mr-2" />
-              Add Category
+              Categorie Toevoegen
             </Button>
           </div>
 
@@ -246,7 +256,7 @@ export default function MenuManagement() {
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <FolderOpen className="w-12 h-12 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">No categories yet. Create your first category!</p>
+                <p className="text-muted-foreground">Nog geen categorieën. Maak uw eerste categorie aan!</p>
               </CardContent>
             </Card>
           ) : (
@@ -275,7 +285,7 @@ export default function MenuManagement() {
                           </div>
                         </div>
                         <Badge variant={category.is_active ? 'default' : 'secondary'}>
-                          {category.is_active ? 'Active' : 'Inactive'}
+                          {category.is_active ? 'Actief' : 'Inactief'}
                         </Badge>
                       </div>
                     </CardHeader>
@@ -293,7 +303,7 @@ export default function MenuManagement() {
                           data-testid={`edit-category-${category.id}`}
                         >
                           <Pencil className="w-4 h-4 mr-1" />
-                          Edit
+                          Bewerken
                         </Button>
                         <Button 
                           variant="outline" 
@@ -303,7 +313,7 @@ export default function MenuManagement() {
                           data-testid={`delete-category-${category.id}`}
                         >
                           <Trash2 className="w-4 h-4 mr-1" />
-                          Delete
+                          Verwijderen
                         </Button>
                       </div>
                     </CardContent>
@@ -319,10 +329,10 @@ export default function MenuManagement() {
           <div className="flex items-center justify-between mb-4 gap-4">
             <Select value={selectedCategory || 'all'} onValueChange={(val) => setSelectedCategory(val === 'all' ? null : val)}>
               <SelectTrigger className="w-48" data-testid="filter-category-select">
-                <SelectValue placeholder="All Categories" />
+                <SelectValue placeholder="Alle Categorieën" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="all">Alle Categorieën</SelectItem>
                 {categories.map((cat) => (
                   <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
                 ))}
@@ -330,7 +340,7 @@ export default function MenuManagement() {
             </Select>
             <Button onClick={() => openItemModal()} data-testid="add-item-btn">
               <Plus className="w-4 h-4 mr-2" />
-              Add Item
+              Item Toevoegen
             </Button>
           </div>
 
@@ -338,7 +348,7 @@ export default function MenuManagement() {
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <UtensilsCrossed className="w-12 h-12 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">No menu items yet. Create your first item!</p>
+                <p className="text-muted-foreground">Nog geen menu items. Maak uw eerste item aan!</p>
               </CardContent>
             </Card>
           ) : (
@@ -372,14 +382,14 @@ export default function MenuManagement() {
                             </span>
                             {item.dietary_tags?.map((tag) => (
                               <Badge key={tag} variant="secondary" className="text-xs">
-                                {dietaryTagConfig[tag]?.label || tag}
+                                {dietaryTagLabelsNL[tag] || dietaryTagConfig[tag]?.label || tag}
                               </Badge>
                             ))}
                           </div>
                         </div>
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-2">
-                            <Label className="text-sm text-muted-foreground">Available</Label>
+                            <Label className="text-sm text-muted-foreground">Beschikbaar</Label>
                             <Switch
                               checked={item.is_available}
                               onCheckedChange={() => handleToggleAvailability(item)}
@@ -418,38 +428,38 @@ export default function MenuManagement() {
       <Dialog open={categoryModalOpen} onOpenChange={setCategoryModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingCategory ? 'Edit Category' : 'Add Category'}</DialogTitle>
+            <DialogTitle>{editingCategory ? 'Categorie Bewerken' : 'Categorie Toevoegen'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Name</Label>
+              <Label>Naam</Label>
               <Input
                 value={categoryForm.name}
                 onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
-                placeholder="Category name"
+                placeholder="Categorienaam"
                 data-testid="category-name-input"
               />
             </div>
             <div className="space-y-2">
-              <Label>Description</Label>
+              <Label>Omschrijving</Label>
               <Textarea
                 value={categoryForm.description}
                 onChange={(e) => setCategoryForm({ ...categoryForm, description: e.target.value })}
-                placeholder="Category description"
+                placeholder="Categorie omschrijving"
                 data-testid="category-description-input"
               />
             </div>
             <div className="space-y-2">
-              <Label>Image URL</Label>
+              <Label>Afbeelding URL</Label>
               <Input
                 value={categoryForm.image_url}
                 onChange={(e) => setCategoryForm({ ...categoryForm, image_url: e.target.value })}
-                placeholder="https://example.com/image.jpg"
+                placeholder="https://voorbeeld.nl/afbeelding.jpg"
                 data-testid="category-image-input"
               />
             </div>
             <div className="space-y-2">
-              <Label>Sort Order</Label>
+              <Label>Sorteervolgorde</Label>
               <Input
                 type="number"
                 value={categoryForm.sort_order}
@@ -459,9 +469,9 @@ export default function MenuManagement() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCategoryModalOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setCategoryModalOpen(false)}>Annuleren</Button>
             <Button onClick={handleCategorySubmit} data-testid="save-category-btn">
-              {editingCategory ? 'Update' : 'Create'}
+              {editingCategory ? 'Bijwerken' : 'Aanmaken'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -471,14 +481,14 @@ export default function MenuManagement() {
       <Dialog open={itemModalOpen} onOpenChange={setItemModalOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editingItem ? 'Edit Menu Item' : 'Add Menu Item'}</DialogTitle>
+            <DialogTitle>{editingItem ? 'Item Bewerken' : 'Item Toevoegen'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 max-h-[60vh] overflow-y-auto">
             <div className="space-y-2">
-              <Label>Category</Label>
+              <Label>Categorie</Label>
               <Select value={itemForm.category_id} onValueChange={(val) => setItemForm({ ...itemForm, category_id: val })}>
                 <SelectTrigger data-testid="item-category-select">
-                  <SelectValue placeholder="Select category" />
+                  <SelectValue placeholder="Selecteer categorie" />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((cat) => (
@@ -488,25 +498,25 @@ export default function MenuManagement() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Name</Label>
+              <Label>Naam</Label>
               <Input
                 value={itemForm.name}
                 onChange={(e) => setItemForm({ ...itemForm, name: e.target.value })}
-                placeholder="Item name"
+                placeholder="Item naam"
                 data-testid="item-name-input"
               />
             </div>
             <div className="space-y-2">
-              <Label>Description</Label>
+              <Label>Omschrijving</Label>
               <Textarea
                 value={itemForm.description}
                 onChange={(e) => setItemForm({ ...itemForm, description: e.target.value })}
-                placeholder="Item description"
+                placeholder="Item omschrijving"
                 data-testid="item-description-input"
               />
             </div>
             <div className="space-y-2">
-              <Label>Price ({settings.currency_symbol})</Label>
+              <Label>Prijs ({settings.currency_symbol})</Label>
               <Input
                 type="number"
                 step="0.01"
@@ -517,18 +527,18 @@ export default function MenuManagement() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Image URL</Label>
+              <Label>Afbeelding URL</Label>
               <Input
                 value={itemForm.image_url}
                 onChange={(e) => setItemForm({ ...itemForm, image_url: e.target.value })}
-                placeholder="https://example.com/image.jpg"
+                placeholder="https://voorbeeld.nl/afbeelding.jpg"
                 data-testid="item-image-input"
               />
             </div>
             <div className="space-y-2">
-              <Label>Dietary Tags</Label>
+              <Label>Dieet Tags</Label>
               <div className="flex flex-wrap gap-2">
-                {Object.entries(dietaryTagConfig).map(([key, config]) => (
+                {Object.entries(dietaryTagLabelsNL).map(([key, label]) => (
                   <Badge
                     key={key}
                     variant={itemForm.dietary_tags.includes(key) ? 'default' : 'outline'}
@@ -536,7 +546,7 @@ export default function MenuManagement() {
                     onClick={() => toggleDietaryTag(key)}
                     data-testid={`dietary-tag-${key}`}
                   >
-                    {config.label}
+                    {label}
                   </Badge>
                 ))}
               </div>
@@ -547,13 +557,13 @@ export default function MenuManagement() {
                 onCheckedChange={(val) => setItemForm({ ...itemForm, is_available: val })}
                 data-testid="item-available-switch"
               />
-              <Label>Available for ordering</Label>
+              <Label>Beschikbaar voor bestellen</Label>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setItemModalOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setItemModalOpen(false)}>Annuleren</Button>
             <Button onClick={handleItemSubmit} data-testid="save-item-btn">
-              {editingItem ? 'Update' : 'Create'}
+              {editingItem ? 'Bijwerken' : 'Aanmaken'}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -6,8 +6,8 @@ export function cn(...inputs) {
 }
 
 // Format currency
-export function formatCurrency(amount, symbol = '$') {
-  return `${symbol}${Number(amount).toFixed(2)}`;
+export function formatCurrency(amount, symbol = '€') {
+  return `${symbol}${Number(amount).toFixed(2).replace('.', ',')}`;
 }
 
 // Format date/time

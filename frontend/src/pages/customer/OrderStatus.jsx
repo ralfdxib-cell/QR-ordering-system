@@ -7,6 +7,15 @@ import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Loader2, CheckCircle2, Clock, ChefHat, UtensilsCrossed, ArrowLeft, RefreshCw } from 'lucide-react';
 
+// Dutch status labels
+const statusLabelsNL = {
+  new: 'Nieuw',
+  preparing: 'In Bereiding',
+  ready: 'Klaar',
+  served: 'Geserveerd',
+  cancelled: 'Geannuleerd',
+};
+
 export default function OrderStatus() {
   const { orderId } = useParams();
   const navigate = useNavigate();
@@ -17,7 +26,6 @@ export default function OrderStatus() {
 
   useEffect(() => {
     fetchOrder();
-    // Poll for updates every 10 seconds
     const interval = setInterval(fetchOrder, 10000);
     return () => clearInterval(interval);
   }, [orderId]);
@@ -57,21 +65,22 @@ export default function OrderStatus() {
   const getStatusMessage = (status) => {
     switch (status) {
       case 'new':
-        return 'Your order has been received';
+        return 'Uw bestelling is ontvangen';
       case 'preparing':
-        return 'The kitchen is preparing your order';
+        return 'De keuken bereidt uw bestelling voor';
       case 'ready':
-        return 'Your order is ready for pickup!';
+        return 'Uw bestelling is klaar!';
       case 'served':
-        return 'Enjoy your meal!';
+        return 'Eet smakelijk!';
       case 'cancelled':
-        return 'This order has been cancelled';
+        return 'Deze bestelling is geannuleerd';
       default:
-        return 'Processing your order';
+        return 'Bestelling wordt verwerkt';
     }
   };
 
   const statusSteps = ['new', 'preparing', 'ready', 'served'];
+  const statusStepsNL = ['Ontvangen', 'In Bereiding', 'Klaar', 'Geserveerd'];
   const currentStepIndex = statusSteps.indexOf(order?.status || 'new');
 
   if (loading) {
@@ -85,9 +94,9 @@ export default function OrderStatus() {
   if (!order) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
-        <h1 className="font-serif text-2xl font-medium text-foreground mb-4">Order Not Found</h1>
+        <h1 className="font-serif text-2xl font-medium text-foreground mb-4">Bestelling Niet Gevonden</h1>
         <Button onClick={() => navigate('/menu')} className="rounded-full" data-testid="back-to-menu-btn">
-          Back to Menu
+          Terug naar Menu
         </Button>
       </div>
     );
@@ -108,8 +117,8 @@ export default function OrderStatus() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="flex-1">
-            <h1 className="font-serif text-2xl font-medium text-foreground">Order Status</h1>
-            <p className="text-sm text-muted-foreground">Table {order.table_number}</p>
+            <h1 className="font-serif text-2xl font-medium text-foreground">Bestelstatus</h1>
+            <p className="text-sm text-muted-foreground">Tafel {order.table_number}</p>
           </div>
           <button
             onClick={handleRefresh}
@@ -133,13 +142,13 @@ export default function OrderStatus() {
             {getStatusIcon(order.status)}
           </div>
           <Badge className={`${statusConfig.color} px-4 py-1 text-sm mb-2`}>
-            {statusConfig.label}
+            {statusLabelsNL[order.status] || statusConfig.label}
           </Badge>
           <p className="text-lg text-foreground font-medium mt-2">
             {getStatusMessage(order.status)}
           </p>
           <p className="text-sm text-muted-foreground mt-1">
-            Order placed at {formatDateTime(order.created_at)}
+            Besteld op {formatDateTime(order.created_at)}
           </p>
         </div>
 
@@ -159,8 +168,8 @@ export default function OrderStatus() {
                     } ${isCurrent ? 'ring-4 ring-primary/20' : ''}`}>
                       {index + 1}
                     </div>
-                    <span className={`text-xs mt-2 capitalize ${isActive ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
-                      {step === 'new' ? 'Received' : step}
+                    <span className={`text-xs mt-2 ${isActive ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+                      {statusStepsNL[index]}
                     </span>
                   </div>
                   {index < statusSteps.length - 1 && (
@@ -177,7 +186,7 @@ export default function OrderStatus() {
         {/* Order Details Card */}
         <div className="bg-card rounded-xl border border-border overflow-hidden">
           <div className="p-4 border-b border-border">
-            <h2 className="font-sans font-bold text-foreground">Order Details</h2>
+            <h2 className="font-sans font-bold text-foreground">Besteldetails</h2>
             <p className="text-sm text-muted-foreground font-mono">#{order.id.slice(0, 8)}</p>
           </div>
 
@@ -212,7 +221,7 @@ export default function OrderStatus() {
 
           {/* Total */}
           <div className="p-4 bg-muted/50 flex justify-between items-center">
-            <span className="font-bold text-foreground">Total</span>
+            <span className="font-bold text-foreground">Totaal</span>
             <span className="font-mono font-bold text-lg text-foreground">
               {formatCurrency(order.total, settings.currency_symbol)}
             </span>
@@ -222,7 +231,7 @@ export default function OrderStatus() {
           {order.notes && (
             <div className="p-4 border-t border-border">
               <p className="text-sm text-muted-foreground">
-                <span className="font-medium">Notes:</span> {order.notes}
+                <span className="font-medium">Opmerkingen:</span> {order.notes}
               </p>
             </div>
           )}
@@ -237,7 +246,7 @@ export default function OrderStatus() {
           className="w-full h-14 rounded-full"
           data-testid="new-order-btn"
         >
-          Order More Items
+          Meer Bestellen
         </Button>
       </div>
     </div>

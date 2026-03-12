@@ -37,7 +37,7 @@ export default function TableManagement() {
       setTables(response.data);
     } catch (error) {
       console.error('Error fetching tables:', error);
-      toast.error('Failed to load tables');
+      toast.error('Tafels laden mislukt');
     } finally {
       setLoading(false);
     }
@@ -61,26 +61,26 @@ export default function TableManagement() {
     try {
       if (editingTable) {
         await tableAPI.update(editingTable.id, tableForm);
-        toast.success('Table updated');
+        toast.success('Tafel bijgewerkt');
       } else {
         await tableAPI.create(tableForm);
-        toast.success('Table created');
+        toast.success('Tafel aangemaakt');
       }
       setModalOpen(false);
       fetchTables();
     } catch (error) {
-      toast.error('Failed to save table');
+      toast.error('Tafel opslaan mislukt');
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Delete this table?')) return;
+    if (!window.confirm('Deze tafel verwijderen?')) return;
     try {
       await tableAPI.delete(id);
-      toast.success('Table deleted');
+      toast.success('Tafel verwijderd');
       fetchTables();
     } catch (error) {
-      toast.error('Failed to delete table');
+      toast.error('Tafel verwijderen mislukt');
     }
   };
 
@@ -88,9 +88,9 @@ export default function TableManagement() {
     try {
       await tableAPI.update(table.id, { is_active: !table.is_active });
       fetchTables();
-      toast.success(`Table ${!table.is_active ? 'activated' : 'deactivated'}`);
+      toast.success(`Tafel ${!table.is_active ? 'geactiveerd' : 'gedeactiveerd'}`);
     } catch (error) {
-      toast.error('Failed to update table');
+      toast.error('Tafel bijwerken mislukt');
     }
   };
 
@@ -98,9 +98,9 @@ export default function TableManagement() {
     try {
       await tableAPI.regenerateQR(tableId);
       fetchTables();
-      toast.success('QR code regenerated');
+      toast.success('QR-code opnieuw gegenereerd');
     } catch (error) {
-      toast.error('Failed to regenerate QR code');
+      toast.error('QR-code genereren mislukt');
     }
   };
 
@@ -116,14 +116,14 @@ export default function TableManagement() {
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
-    toast.success('Copied to clipboard');
+    toast.success('Gekopieerd naar klembord');
   };
 
   const downloadQR = (table) => {
     const url = getQRCodeURL(getTableURL(table), 400);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `table-${table.table_number}-qr.png`;
+    link.download = `tafel-${table.table_number}-qr.png`;
     link.click();
   };
 
@@ -140,12 +140,12 @@ export default function TableManagement() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-serif text-3xl font-medium text-foreground">Tables & QR Codes</h1>
-          <p className="text-muted-foreground">Manage tables and generate QR codes for ordering</p>
+          <h1 className="font-serif text-3xl font-medium text-foreground">Tafels & QR-codes</h1>
+          <p className="text-muted-foreground">Beheer tafels en genereer QR-codes voor bestellen</p>
         </div>
         <Button onClick={() => openModal()} data-testid="add-table-btn">
           <Plus className="w-4 h-4 mr-2" />
-          Add Table
+          Tafel Toevoegen
         </Button>
       </div>
 
@@ -154,7 +154,7 @@ export default function TableManagement() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Grid3X3 className="w-12 h-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">No tables yet. Create your first table!</p>
+            <p className="text-muted-foreground">Nog geen tafels. Maak uw eerste tafel aan!</p>
           </CardContent>
         </Card>
       ) : (
@@ -163,9 +163,9 @@ export default function TableManagement() {
             <Card key={table.id} data-testid={`table-card-${table.id}`}>
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-2xl font-mono">Table {table.table_number}</CardTitle>
+                  <CardTitle className="text-2xl font-mono">Tafel {table.table_number}</CardTitle>
                   <Badge variant={table.is_active ? 'default' : 'secondary'}>
-                    {table.is_active ? 'Active' : 'Inactive'}
+                    {table.is_active ? 'Actief' : 'Inactief'}
                   </Badge>
                 </div>
               </CardHeader>
@@ -177,15 +177,15 @@ export default function TableManagement() {
                 >
                   <img
                     src={getQRCodeURL(getTableURL(table), 200)}
-                    alt={`QR Code for Table ${table.table_number}`}
+                    alt={`QR-code voor Tafel ${table.table_number}`}
                     className="w-full h-full object-contain"
                   />
                 </div>
 
                 {/* Info */}
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Capacity</span>
-                  <span className="font-medium">{table.capacity} seats</span>
+                  <span className="text-muted-foreground">Capaciteit</span>
+                  <span className="font-medium">{table.capacity} stoelen</span>
                 </div>
 
                 {/* Actions */}
@@ -198,7 +198,7 @@ export default function TableManagement() {
                     data-testid={`view-qr-${table.id}`}
                   >
                     <QrCode className="w-4 h-4 mr-1" />
-                    View QR
+                    QR Bekijken
                   </Button>
                   <Button 
                     variant="outline" 
@@ -221,7 +221,7 @@ export default function TableManagement() {
 
                 {/* Toggle */}
                 <div className="flex items-center justify-between pt-2 border-t border-border">
-                  <Label className="text-sm text-muted-foreground">Active</Label>
+                  <Label className="text-sm text-muted-foreground">Actief</Label>
                   <Switch
                     checked={table.is_active}
                     onCheckedChange={() => handleToggleActive(table)}
@@ -238,20 +238,20 @@ export default function TableManagement() {
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingTable ? 'Edit Table' : 'Add Table'}</DialogTitle>
+            <DialogTitle>{editingTable ? 'Tafel Bewerken' : 'Tafel Toevoegen'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Table Number</Label>
+              <Label>Tafelnummer</Label>
               <Input
                 value={tableForm.table_number}
                 onChange={(e) => setTableForm({ ...tableForm, table_number: e.target.value })}
-                placeholder="e.g. 1, A1, Patio-1"
+                placeholder="bijv. 1, A1, Terras-1"
                 data-testid="table-number-input"
               />
             </div>
             <div className="space-y-2">
-              <Label>Capacity (seats)</Label>
+              <Label>Capaciteit (stoelen)</Label>
               <Input
                 type="number"
                 min={1}
@@ -262,9 +262,9 @@ export default function TableManagement() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setModalOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setModalOpen(false)}>Annuleren</Button>
             <Button onClick={handleSubmit} data-testid="save-table-btn">
-              {editingTable ? 'Update' : 'Create'}
+              {editingTable ? 'Bijwerken' : 'Aanmaken'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -274,7 +274,7 @@ export default function TableManagement() {
       <Dialog open={qrModalOpen} onOpenChange={setQrModalOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>QR Code - Table {selectedTable?.table_number}</DialogTitle>
+            <DialogTitle>QR-code - Tafel {selectedTable?.table_number}</DialogTitle>
           </DialogHeader>
           {selectedTable && (
             <div className="space-y-4">
@@ -282,7 +282,7 @@ export default function TableManagement() {
               <div className="bg-white rounded-lg p-6">
                 <img
                   src={getQRCodeURL(getTableURL(selectedTable), 300)}
-                  alt={`QR Code for Table ${selectedTable.table_number}`}
+                  alt={`QR-code voor Tafel ${selectedTable.table_number}`}
                   className="w-full"
                 />
               </div>
@@ -324,12 +324,12 @@ export default function TableManagement() {
                   data-testid="regenerate-qr-btn"
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
-                  Regenerate
+                  Opnieuw
                 </Button>
               </div>
 
               <p className="text-xs text-muted-foreground text-center">
-                Print this QR code and place it on the table. Customers can scan it to view the menu and place orders.
+                Print deze QR-code en plaats deze op de tafel. Klanten kunnen scannen om het menu te bekijken en te bestellen.
               </p>
             </div>
           )}

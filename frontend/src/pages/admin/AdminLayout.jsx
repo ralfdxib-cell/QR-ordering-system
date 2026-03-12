@@ -16,10 +16,10 @@ import {
 
 const navItems = [
   { path: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
-  { path: '/admin/menu', icon: UtensilsCrossed, label: 'Menu Management' },
-  { path: '/admin/tables', icon: Grid3X3, label: 'Tables & QR Codes' },
-  { path: '/admin/orders', icon: Receipt, label: 'Orders' },
-  { path: '/admin/settings', icon: Settings, label: 'Settings' },
+  { path: '/admin/menu', icon: UtensilsCrossed, label: 'Menu Beheer' },
+  { path: '/admin/tables', icon: Grid3X3, label: 'Tafels & QR-codes' },
+  { path: '/admin/orders', icon: Receipt, label: 'Bestellingen' },
+  { path: '/admin/settings', icon: Settings, label: 'Instellingen' },
 ];
 
 export default function AdminLayout() {
@@ -141,7 +141,7 @@ export default function AdminLayout() {
             data-testid="nav-kitchen"
           >
             <ChefHat className="w-5 h-5" />
-            Kitchen Display
+            Keuken Display
           </button>
         </div>
 
@@ -167,7 +167,7 @@ export default function AdminLayout() {
             data-testid="logout-btn"
           >
             <LogOut className="w-4 h-4 mr-2" />
-            Sign Out
+            Uitloggen
           </Button>
         </div>
       </aside>

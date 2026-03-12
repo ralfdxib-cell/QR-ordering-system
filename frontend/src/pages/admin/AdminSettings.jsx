@@ -15,8 +15,8 @@ export default function AdminSettings() {
     logo_url: settings.logo_url || '',
     primary_color: settings.primary_color || '#5A6B5D',
     secondary_color: settings.secondary_color || '#E8E6E1',
-    currency: settings.currency || 'USD',
-    currency_symbol: settings.currency_symbol || '$',
+    currency: settings.currency || 'EUR',
+    currency_symbol: settings.currency_symbol || '€',
   });
 
   // Update form when settings load
@@ -27,8 +27,8 @@ export default function AdminSettings() {
         logo_url: settings.logo_url || '',
         primary_color: settings.primary_color || '#5A6B5D',
         secondary_color: settings.secondary_color || '#E8E6E1',
-        currency: settings.currency || 'USD',
-        currency_symbol: settings.currency_symbol || '$',
+        currency: settings.currency || 'EUR',
+        currency_symbol: settings.currency_symbol || '€',
       });
     }
   }, [settings, settingsLoading]);
@@ -38,21 +38,21 @@ export default function AdminSettings() {
     setSaving(true);
     try {
       await updateSettings(form);
-      toast.success('Settings saved successfully');
+      toast.success('Instellingen opgeslagen');
     } catch (error) {
-      toast.error('Failed to save settings');
+      toast.error('Instellingen opslaan mislukt');
     } finally {
       setSaving(false);
     }
   };
 
   const colorPresets = [
-    { name: 'Sage Green', primary: '#5A6B5D', secondary: '#E8E6E1' },
-    { name: 'Ocean Blue', primary: '#2563EB', secondary: '#DBEAFE' },
-    { name: 'Warm Orange', primary: '#EA580C', secondary: '#FED7AA' },
-    { name: 'Royal Purple', primary: '#7C3AED', secondary: '#EDE9FE' },
-    { name: 'Rose', primary: '#E11D48', secondary: '#FCE7F3' },
-    { name: 'Slate', primary: '#475569', secondary: '#F1F5F9' },
+    { name: 'Salie Groen', primary: '#5A6B5D', secondary: '#E8E6E1' },
+    { name: 'Oceaan Blauw', primary: '#2563EB', secondary: '#DBEAFE' },
+    { name: 'Warm Oranje', primary: '#EA580C', secondary: '#FED7AA' },
+    { name: 'Koninklijk Paars', primary: '#7C3AED', secondary: '#EDE9FE' },
+    { name: 'Roos', primary: '#E11D48', secondary: '#FCE7F3' },
+    { name: 'Leisteen', primary: '#475569', secondary: '#F1F5F9' },
   ];
 
   if (settingsLoading) {
@@ -67,8 +67,8 @@ export default function AdminSettings() {
     <div className="p-6 space-y-6 max-w-4xl">
       {/* Header */}
       <div>
-        <h1 className="font-serif text-3xl font-medium text-foreground">Settings</h1>
-        <p className="text-muted-foreground">Customize your restaurant's appearance</p>
+        <h1 className="font-serif text-3xl font-medium text-foreground">Instellingen</h1>
+        <p className="text-muted-foreground">Pas de uitstraling van uw restaurant aan</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -77,18 +77,18 @@ export default function AdminSettings() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <ImageIcon className="w-5 h-5" />
-              Restaurant Information
+              Restaurant Informatie
             </CardTitle>
-            <CardDescription>Basic information about your restaurant</CardDescription>
+            <CardDescription>Basisinformatie over uw restaurant</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Restaurant Name</Label>
+              <Label htmlFor="name">Restaurant Naam</Label>
               <Input
                 id="name"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="My Restaurant"
+                placeholder="Mijn Restaurant"
                 data-testid="settings-name-input"
               />
             </div>
@@ -98,14 +98,14 @@ export default function AdminSettings() {
                 id="logo"
                 value={form.logo_url}
                 onChange={(e) => setForm({ ...form, logo_url: e.target.value })}
-                placeholder="https://example.com/logo.png"
+                placeholder="https://voorbeeld.nl/logo.png"
                 data-testid="settings-logo-input"
               />
               {form.logo_url && (
                 <div className="mt-2 p-4 bg-muted rounded-lg">
                   <img 
                     src={form.logo_url} 
-                    alt="Logo preview" 
+                    alt="Logo voorbeeld" 
                     className="h-16 object-contain"
                     onError={(e) => e.target.style.display = 'none'}
                   />
@@ -120,14 +120,14 @@ export default function AdminSettings() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Palette className="w-5 h-5" />
-              Brand Colors
+              Huisstijlkleuren
             </CardTitle>
-            <CardDescription>Customize your restaurant's color scheme</CardDescription>
+            <CardDescription>Pas het kleurenschema van uw restaurant aan</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Color Presets */}
             <div className="space-y-2">
-              <Label>Color Presets</Label>
+              <Label>Kleur Voorinstellingen</Label>
               <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
                 {colorPresets.map((preset) => (
                   <button
@@ -160,7 +160,7 @@ export default function AdminSettings() {
             {/* Custom Colors */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="primary">Primary Color</Label>
+                <Label htmlFor="primary">Primaire Kleur</Label>
                 <div className="flex gap-2">
                   <Input
                     id="primary"
@@ -179,7 +179,7 @@ export default function AdminSettings() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="secondary">Secondary Color</Label>
+                <Label htmlFor="secondary">Secundaire Kleur</Label>
                 <div className="flex gap-2">
                   <Input
                     id="secondary"
@@ -201,7 +201,7 @@ export default function AdminSettings() {
 
             {/* Preview */}
             <div className="space-y-2">
-              <Label>Preview</Label>
+              <Label>Voorbeeld</Label>
               <div 
                 className="p-6 rounded-lg border border-border"
                 style={{ backgroundColor: form.secondary_color }}
@@ -210,14 +210,14 @@ export default function AdminSettings() {
                   className="font-serif text-2xl mb-2"
                   style={{ color: form.primary_color }}
                 >
-                  {form.name || 'My Restaurant'}
+                  {form.name || 'Mijn Restaurant'}
                 </h3>
                 <button
                   type="button"
                   className="px-6 py-2 rounded-full text-white font-medium"
                   style={{ backgroundColor: form.primary_color }}
                 >
-                  Sample Button
+                  Voorbeeld Knop
                 </button>
               </div>
             </div>
@@ -229,37 +229,37 @@ export default function AdminSettings() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <DollarSign className="w-5 h-5" />
-              Currency Settings
+              Valuta Instellingen
             </CardTitle>
-            <CardDescription>Configure your pricing display</CardDescription>
+            <CardDescription>Configureer uw prijsweergave</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="currency">Currency Code</Label>
+                <Label htmlFor="currency">Valuta Code</Label>
                 <Input
                   id="currency"
                   value={form.currency}
                   onChange={(e) => setForm({ ...form, currency: e.target.value.toUpperCase() })}
-                  placeholder="USD"
+                  placeholder="EUR"
                   maxLength={3}
                   data-testid="currency-code-input"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="symbol">Currency Symbol</Label>
+                <Label htmlFor="symbol">Valuta Symbool</Label>
                 <Input
                   id="symbol"
                   value={form.currency_symbol}
                   onChange={(e) => setForm({ ...form, currency_symbol: e.target.value })}
-                  placeholder="$"
+                  placeholder="€"
                   maxLength={3}
                   data-testid="currency-symbol-input"
                 />
               </div>
             </div>
             <p className="text-sm text-muted-foreground mt-2">
-              Preview: {form.currency_symbol}19.99
+              Voorbeeld: {form.currency_symbol}19,99
             </p>
           </CardContent>
         </Card>
@@ -270,12 +270,12 @@ export default function AdminSettings() {
             {saving ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Saving...
+                Opslaan...
               </>
             ) : (
               <>
                 <Save className="w-4 h-4 mr-2" />
-                Save Changes
+                Wijzigingen Opslaan
               </>
             )}
           </Button>

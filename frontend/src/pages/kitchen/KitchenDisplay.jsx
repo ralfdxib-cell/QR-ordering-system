@@ -6,6 +6,15 @@ import { Badge } from '../../components/ui/badge';
 import { Loader2, RefreshCw, ChefHat, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
+// Dutch status labels
+const statusLabelsNL = {
+  new: 'Nieuw',
+  preparing: 'In Bereiding',
+  ready: 'Klaar',
+  served: 'Geserveerd',
+  cancelled: 'Geannuleerd',
+};
+
 export default function KitchenDisplay() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,9 +22,7 @@ export default function KitchenDisplay() {
 
   useEffect(() => {
     fetchOrders();
-    // Poll for new orders every 5 seconds
     const orderInterval = setInterval(fetchOrders, 5000);
-    // Update time display every second
     const timeInterval = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => {
       clearInterval(orderInterval);
@@ -38,10 +45,10 @@ export default function KitchenDisplay() {
     try {
       await orderAPI.updateStatus(orderId, newStatus);
       fetchOrders();
-      toast.success(`Order marked as ${newStatus}`);
+      toast.success(`Bestelling gemarkeerd als ${statusLabelsNL[newStatus]}`);
     } catch (error) {
       console.error('Error updating order:', error);
-      toast.error('Failed to update order status');
+      toast.error('Status bijwerken mislukt');
     }
   };
 
@@ -56,9 +63,9 @@ export default function KitchenDisplay() {
 
   const getStatusAction = (status) => {
     switch (status) {
-      case 'new': return 'Start Preparing';
-      case 'preparing': return 'Mark Ready';
-      case 'ready': return 'Mark Served';
+      case 'new': return 'Start Bereiding';
+      case 'preparing': return 'Markeer Klaar';
+      case 'ready': return 'Markeer Geserveerd';
       default: return null;
     }
   };
@@ -82,23 +89,23 @@ export default function KitchenDisplay() {
         <div className="flex items-center gap-3">
           <ChefHat className="w-8 h-8 text-sky-400" />
           <div>
-            <h1 className="font-mono text-xl font-bold text-white">Kitchen Display</h1>
-            <p className="text-sm text-slate-400">Active Orders: {orders.length}</p>
+            <h1 className="font-mono text-xl font-bold text-white">Keuken Display</h1>
+            <p className="text-sm text-slate-400">Actieve Bestellingen: {orders.length}</p>
           </div>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-6 text-sm">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-blue-500" />
-              <span className="text-slate-300">New ({newOrders.length})</span>
+              <span className="text-slate-300">Nieuw ({newOrders.length})</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-yellow-500" />
-              <span className="text-slate-300">Preparing ({preparingOrders.length})</span>
+              <span className="text-slate-300">In Bereiding ({preparingOrders.length})</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-green-500" />
-              <span className="text-slate-300">Ready ({readyOrders.length})</span>
+              <span className="text-slate-300">Klaar ({readyOrders.length})</span>
             </div>
           </div>
           <Button
@@ -109,7 +116,7 @@ export default function KitchenDisplay() {
             data-testid="refresh-orders-btn"
           >
             <RefreshCw className="w-4 h-4 mr-2" />
-            Refresh
+            Vernieuwen
           </Button>
         </div>
       </header>
@@ -118,8 +125,8 @@ export default function KitchenDisplay() {
       {orders.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24">
           <ChefHat className="w-16 h-16 text-slate-600 mb-4" />
-          <h2 className="text-xl font-mono text-slate-400">No Active Orders</h2>
-          <p className="text-slate-500">New orders will appear here</p>
+          <h2 className="text-xl font-mono text-slate-400">Geen Actieve Bestellingen</h2>
+          <p className="text-slate-500">Nieuwe bestellingen verschijnen hier</p>
         </div>
       ) : (
         <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
@@ -139,7 +146,7 @@ export default function KitchenDisplay() {
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-lg font-bold text-white">
-                        Table {order.table_number}
+                        Tafel {order.table_number}
                       </span>
                       {order.customer_name && (
                         <span className="text-sm text-slate-400">({order.customer_name})</span>
@@ -150,7 +157,7 @@ export default function KitchenDisplay() {
                     </span>
                   </div>
                   <Badge className={statusConfig?.color || 'bg-slate-700'}>
-                    {statusConfig?.label || order.status}
+                    {statusLabelsNL[order.status] || statusConfig?.label || order.status}
                   </Badge>
                 </div>
 
@@ -202,7 +209,7 @@ export default function KitchenDisplay() {
                 {order.notes && (
                   <div className="px-3 py-2 border-t border-slate-700 bg-slate-900/50">
                     <p className="text-sm text-orange-400">
-                      <span className="font-bold">Note:</span> {order.notes}
+                      <span className="font-bold">Opmerking:</span> {order.notes}
                     </p>
                   </div>
                 )}
@@ -231,7 +238,7 @@ export default function KitchenDisplay() {
                       data-testid={`cancel-btn-${order.id}`}
                     >
                       <XCircle className="w-4 h-4 mr-2" />
-                      Cancel Order
+                      Annuleer Bestelling
                     </Button>
                   )}
                 </div>
