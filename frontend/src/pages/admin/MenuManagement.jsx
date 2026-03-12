@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { categoryAPI, menuItemAPI } from '../../lib/api';
+import React, { useState, useEffect, useRef } from 'react';
+import { categoryAPI, menuItemAPI, uploadAPI } from '../../lib/api';
 import { formatCurrency, dietaryTagConfig } from '../../lib/utils';
 import { useSettings } from '../../context/SettingsContext';
 import { Button } from '../../components/ui/button';
@@ -20,7 +20,9 @@ import {
   Loader2, 
   UtensilsCrossed,
   FolderOpen,
-  ImageIcon
+  ImageIcon,
+  Upload,
+  X
 } from 'lucide-react';
 
 // Dutch dietary tag labels
@@ -49,6 +51,8 @@ export default function MenuManagement() {
     image_url: '',
     sort_order: 0,
   });
+  const [categoryUploading, setCategoryUploading] = useState(false);
+  const categoryFileRef = useRef(null);
 
   // Item Modal
   const [itemModalOpen, setItemModalOpen] = useState(false);
@@ -63,6 +67,8 @@ export default function MenuManagement() {
     is_available: true,
     sort_order: 0,
   });
+  const [itemUploading, setItemUploading] = useState(false);
+  const itemFileRef = useRef(null);
 
   useEffect(() => {
     fetchData();
@@ -84,6 +90,30 @@ export default function MenuManagement() {
     }
   };
 
+  // Image upload handler
+  const handleImageUpload = async (file, setUploading, setFormCallback) => {
+    if (!file) return;
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Bestand is te groot. Maximum is 5MB.');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const response = await uploadAPI.uploadImage(file);
+      const imageUrl = `${process.env.REACT_APP_BACKEND_URL}${response.data.image_url}`;
+      setFormCallback(imageUrl);
+      toast.success('Afbeelding geüpload!');
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error(error.response?.data?.detail || 'Afbeelding uploaden mislukt');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   // Category handlers
   const openCategoryModal = (category = null) => {
     if (category) {
@@ -99,6 +129,13 @@ export default function MenuManagement() {
       setCategoryForm({ name: '', description: '', image_url: '', sort_order: 0 });
     }
     setCategoryModalOpen(true);
+  };
+
+  const handleCategoryImageUpload = (event) => {
+    const file = event.target.files?.[0];
+    handleImageUpload(file, setCategoryUploading, (url) => {
+      setCategoryForm(prev => ({ ...prev, image_url: url }));
+    });
   };
 
   const handleCategorySubmit = async () => {
@@ -156,6 +193,13 @@ export default function MenuManagement() {
       });
     }
     setItemModalOpen(true);
+  };
+
+  const handleItemImageUpload = (event) => {
+    const file = event.target.files?.[0];
+    handleImageUpload(file, setItemUploading, (url) => {
+      setItemForm(prev => ({ ...prev, image_url: url }));
+    });
   };
 
   const handleItemSubmit = async () => {
@@ -426,7 +470,7 @@ export default function MenuManagement() {
 
       {/* Category Modal */}
       <Dialog open={categoryModalOpen} onOpenChange={setCategoryModalOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>{editingCategory ? 'Categorie Bewerken' : 'Categorie Toevoegen'}</DialogTitle>
           </DialogHeader>
@@ -449,15 +493,68 @@ export default function MenuManagement() {
                 data-testid="category-description-input"
               />
             </div>
+            
+            {/* Category Image Upload */}
             <div className="space-y-2">
-              <Label>Afbeelding URL</Label>
-              <Input
-                value={categoryForm.image_url}
-                onChange={(e) => setCategoryForm({ ...categoryForm, image_url: e.target.value })}
-                placeholder="https://voorbeeld.nl/afbeelding.jpg"
-                data-testid="category-image-input"
-              />
+              <Label>Afbeelding</Label>
+              <div className="flex items-start gap-4">
+                <div className="w-24 h-24 rounded-lg border-2 border-dashed border-border bg-muted flex items-center justify-center overflow-hidden">
+                  {categoryForm.image_url ? (
+                    <img 
+                      src={categoryForm.image_url} 
+                      alt="Preview" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="flex-1 space-y-2">
+                  <input
+                    ref={categoryFileRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
+                    onChange={handleCategoryImageUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => categoryFileRef.current?.click()}
+                    disabled={categoryUploading}
+                    className="w-full"
+                    data-testid="upload-category-image-btn"
+                  >
+                    {categoryUploading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Uploaden...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4 mr-2" />
+                        Afbeelding Uploaden
+                      </>
+                    )}
+                  </Button>
+                  {categoryForm.image_url && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setCategoryForm({ ...categoryForm, image_url: '' })}
+                      className="w-full text-destructive hover:text-destructive"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Verwijderen
+                    </Button>
+                  )}
+                  <p className="text-xs text-muted-foreground">JPG, PNG, GIF, WebP. Max 5MB.</p>
+                </div>
+              </div>
             </div>
+
             <div className="space-y-2">
               <Label>Sorteervolgorde</Label>
               <Input
@@ -483,7 +580,7 @@ export default function MenuManagement() {
           <DialogHeader>
             <DialogTitle>{editingItem ? 'Item Bewerken' : 'Item Toevoegen'}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
             <div className="space-y-2">
               <Label>Categorie</Label>
               <Select value={itemForm.category_id} onValueChange={(val) => setItemForm({ ...itemForm, category_id: val })}>
@@ -526,15 +623,68 @@ export default function MenuManagement() {
                 data-testid="item-price-input"
               />
             </div>
+            
+            {/* Item Image Upload */}
             <div className="space-y-2">
-              <Label>Afbeelding URL</Label>
-              <Input
-                value={itemForm.image_url}
-                onChange={(e) => setItemForm({ ...itemForm, image_url: e.target.value })}
-                placeholder="https://voorbeeld.nl/afbeelding.jpg"
-                data-testid="item-image-input"
-              />
+              <Label>Afbeelding</Label>
+              <div className="flex items-start gap-4">
+                <div className="w-24 h-24 rounded-lg border-2 border-dashed border-border bg-muted flex items-center justify-center overflow-hidden">
+                  {itemForm.image_url ? (
+                    <img 
+                      src={itemForm.image_url} 
+                      alt="Preview" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <UtensilsCrossed className="w-8 h-8 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="flex-1 space-y-2">
+                  <input
+                    ref={itemFileRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
+                    onChange={handleItemImageUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => itemFileRef.current?.click()}
+                    disabled={itemUploading}
+                    className="w-full"
+                    data-testid="upload-item-image-btn"
+                  >
+                    {itemUploading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Uploaden...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4 mr-2" />
+                        Afbeelding Uploaden
+                      </>
+                    )}
+                  </Button>
+                  {itemForm.image_url && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setItemForm({ ...itemForm, image_url: '' })}
+                      className="w-full text-destructive hover:text-destructive"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Verwijderen
+                    </Button>
+                  )}
+                  <p className="text-xs text-muted-foreground">JPG, PNG, GIF, WebP. Max 5MB.</p>
+                </div>
+              </div>
             </div>
+
             <div className="space-y-2">
               <Label>Dieet Tags</Label>
               <div className="flex flex-wrap gap-2">
