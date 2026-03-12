@@ -5,12 +5,12 @@ const SettingsContext = createContext();
 
 const defaultSettings = {
   id: '',
-  name: 'My Restaurant',
+  name: 'Mijn Restaurant',
   logo_url: null,
   primary_color: '#5A6B5D',
   secondary_color: '#E8E6E1',
-  currency: 'USD',
-  currency_symbol: '$',
+  currency: 'EUR',
+  currency_symbol: '€',
 };
 
 export function SettingsProvider({ children }) {
