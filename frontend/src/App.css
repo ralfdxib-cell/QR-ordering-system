@@ -1,34 +1,190 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* App-specific styles */
+
+/* Mobile-first responsive container */
+.app-container {
+  @apply min-h-screen;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+/* Customer app layout */
+.customer-layout {
+  @apply min-h-screen bg-background;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+/* Admin layout */
+.admin-layout {
+  @apply min-h-screen bg-muted;
 }
 
-.App-link {
-    color: #61dafb;
+/* KDS layout - dark theme forced */
+.kds-layout {
+  @apply min-h-screen;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+/* Menu item image container */
+.menu-item-image {
+  @apply relative aspect-[4/3] overflow-hidden rounded-t-xl;
+}
+
+.menu-item-image img {
+  @apply w-full h-full object-cover transition-transform duration-500;
+}
+
+.menu-item-image:hover img {
+  @apply scale-110;
+}
+
+/* Dietary tag badges */
+.dietary-badge {
+  @apply inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full;
+}
+
+.dietary-badge-vegetarian {
+  @apply bg-green-100 text-green-800;
+}
+
+.dietary-badge-vegan {
+  @apply bg-emerald-100 text-emerald-800;
+}
+
+.dietary-badge-gluten-free {
+  @apply bg-amber-100 text-amber-800;
+}
+
+.dietary-badge-seafood {
+  @apply bg-blue-100 text-blue-800;
+}
+
+/* Cart badge pulse */
+.cart-badge {
+  @apply absolute -top-2 -right-2 w-5 h-5 bg-primary text-primary-foreground text-xs font-bold rounded-full flex items-center justify-center;
+}
+
+/* Price display */
+.price-tag {
+  @apply font-mono text-lg font-medium text-primary;
+}
+
+/* Order status badge */
+.status-badge {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+}
+
+.status-new {
+  @apply bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400;
+}
+
+.status-preparing {
+  @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400;
+}
+
+.status-ready {
+  @apply bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400;
+}
+
+.status-served {
+  @apply bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400;
+}
+
+.status-cancelled {
+  @apply bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400;
+}
+
+/* QR Code container */
+.qr-container {
+  @apply p-4 bg-white rounded-xl shadow-soft;
+}
+
+/* Bottom navigation */
+.bottom-nav {
+  @apply fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-xl border-t border-border z-50;
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+/* Floating cart button */
+.floating-cart {
+  @apply fixed bottom-24 right-4 z-40;
+}
+
+/* Admin sidebar */
+.admin-sidebar {
+  @apply fixed left-0 top-0 h-full w-64 bg-card border-r border-border z-40;
+}
+
+.admin-content {
+  @apply ml-0 lg:ml-64 transition-all duration-300;
+}
+
+/* KDS grid */
+.kds-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 p-4;
+}
+
+/* KDS order ticket */
+.kds-order-ticket {
+  @apply flex flex-col bg-card rounded-lg overflow-hidden;
+  min-height: 200px;
+}
+
+.kds-ticket-header {
+  @apply p-3 flex justify-between items-center border-b border-border;
+}
+
+.kds-ticket-body {
+  @apply flex-1 p-3 space-y-2;
+}
+
+.kds-ticket-footer {
+  @apply p-3 border-t border-border;
+}
+
+/* Form styles */
+.form-group {
+  @apply space-y-2;
+}
+
+.form-label {
+  @apply text-sm font-medium text-foreground;
+}
+
+.form-input {
+  @apply w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent transition-colors;
+}
+
+/* Table styles */
+.data-table {
+  @apply w-full border-collapse;
+}
+
+.data-table th {
+  @apply px-4 py-3 text-left text-sm font-semibold text-muted-foreground bg-muted;
+}
+
+.data-table td {
+  @apply px-4 py-3 border-b border-border;
+}
+
+.data-table tr:hover td {
+  @apply bg-muted/50;
+}
+
+/* Loading spinner */
+.spinner {
+  @apply animate-spin rounded-full border-2 border-muted border-t-primary;
+}
+
+/* Empty state */
+.empty-state {
+  @apply flex flex-col items-center justify-center py-12 text-center;
+}
+
+.empty-state-icon {
+  @apply w-16 h-16 text-muted-foreground mb-4;
+}
+
+.empty-state-title {
+  @apply text-lg font-semibold text-foreground mb-2;
+}
+
+.empty-state-description {
+  @apply text-sm text-muted-foreground;
 }

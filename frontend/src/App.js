@@ -1,53 +1,60 @@
-import { useEffect } from "react";
+import React from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
+import { Toaster } from "./components/ui/sonner";
+import { CartProvider } from "./context/CartContext";
+import { SettingsProvider } from "./context/SettingsContext";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+// Customer Pages
+import TableLanding from "./pages/customer/TableLanding";
+import Menu from "./pages/customer/Menu";
+import Cart from "./pages/customer/Cart";
+import OrderStatus from "./pages/customer/OrderStatus";
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
+// Kitchen Pages
+import KitchenDisplay from "./pages/kitchen/KitchenDisplay";
 
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
-
-  return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
+// Admin Pages
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminLayout from "./pages/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import MenuManagement from "./pages/admin/MenuManagement";
+import TableManagement from "./pages/admin/TableManagement";
+import AdminOrders from "./pages/admin/AdminOrders";
+import AdminSettings from "./pages/admin/AdminSettings";
 
 function App() {
   return (
-    <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </div>
+    <SettingsProvider>
+      <CartProvider>
+        <div className="App">
+          <BrowserRouter>
+            <Routes>
+              {/* Customer Routes */}
+              <Route path="/" element={<TableLanding />} />
+              <Route path="/table/:qrCode" element={<TableLanding />} />
+              <Route path="/menu" element={<Menu />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/order/:orderId" element={<OrderStatus />} />
+
+              {/* Kitchen Route */}
+              <Route path="/kitchen" element={<KitchenDisplay />} />
+
+              {/* Admin Routes */}
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="menu" element={<MenuManagement />} />
+                <Route path="tables" element={<TableManagement />} />
+                <Route path="orders" element={<AdminOrders />} />
+                <Route path="settings" element={<AdminSettings />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+          <Toaster position="top-center" richColors />
+        </div>
+      </CartProvider>
+    </SettingsProvider>
   );
 }
 
