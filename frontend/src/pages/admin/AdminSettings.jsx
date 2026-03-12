@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useSettings } from '../../context/SettingsContext';
+import { uploadAPI } from '../../lib/api';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
 import { toast } from 'sonner';
-import { Loader2, Palette, DollarSign, ImageIcon, Save } from 'lucide-react';
+import { Loader2, Palette, DollarSign, ImageIcon, Save, Upload, X, Image } from 'lucide-react';
 
 export default function AdminSettings() {
   const { settings, updateSettings, loading: settingsLoading } = useSettings();
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
   const [form, setForm] = useState({
     name: settings.name || '',
     logo_url: settings.logo_url || '',
@@ -32,6 +35,34 @@ export default function AdminSettings() {
       });
     }
   }, [settings, settingsLoading]);
+
+  const handleLogoUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Bestand is te groot. Maximum is 5MB.');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const response = await uploadAPI.uploadLogo(file);
+      const logoUrl = `${process.env.REACT_APP_BACKEND_URL}${response.data.logo_url}`;
+      setForm(prev => ({ ...prev, logo_url: logoUrl }));
+      toast.success('Logo geüpload!');
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error(error.response?.data?.detail || 'Logo uploaden mislukt');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveLogo = () => {
+    setForm(prev => ({ ...prev, logo_url: '' }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -92,25 +123,77 @@ export default function AdminSettings() {
                 data-testid="settings-name-input"
               />
             </div>
+            
+            {/* Logo Upload */}
             <div className="space-y-2">
-              <Label htmlFor="logo">Logo URL</Label>
-              <Input
-                id="logo"
-                value={form.logo_url}
-                onChange={(e) => setForm({ ...form, logo_url: e.target.value })}
-                placeholder="https://voorbeeld.nl/logo.png"
-                data-testid="settings-logo-input"
-              />
-              {form.logo_url && (
-                <div className="mt-2 p-4 bg-muted rounded-lg">
-                  <img 
-                    src={form.logo_url} 
-                    alt="Logo voorbeeld" 
-                    className="h-16 object-contain"
-                    onError={(e) => e.target.style.display = 'none'}
-                  />
+              <Label>Logo</Label>
+              <div className="flex items-start gap-4">
+                {/* Logo Preview */}
+                <div className="w-32 h-32 rounded-lg border-2 border-dashed border-border bg-muted flex items-center justify-center overflow-hidden">
+                  {form.logo_url ? (
+                    <img 
+                      src={form.logo_url} 
+                      alt="Logo" 
+                      className="w-full h-full object-contain p-2"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <Image className="w-8 h-8 text-muted-foreground" />
+                  )}
                 </div>
-              )}
+                
+                {/* Upload Controls */}
+                <div className="flex-1 space-y-3">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml"
+                    onChange={handleLogoUpload}
+                    className="hidden"
+                    data-testid="logo-file-input"
+                  />
+                  
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="w-full"
+                    data-testid="upload-logo-btn"
+                  >
+                    {uploading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Uploaden...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4 mr-2" />
+                        Logo Uploaden
+                      </>
+                    )}
+                  </Button>
+                  
+                  {form.logo_url && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={handleRemoveLogo}
+                      className="w-full text-destructive hover:text-destructive"
+                      data-testid="remove-logo-btn"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Logo Verwijderen
+                    </Button>
+                  )}
+                  
+                  <p className="text-xs text-muted-foreground">
+                    Ondersteunde formaten: JPG, PNG, GIF, WebP, SVG. Max 5MB.
+                  </p>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -206,12 +289,21 @@ export default function AdminSettings() {
                 className="p-6 rounded-lg border border-border"
                 style={{ backgroundColor: form.secondary_color }}
               >
-                <h3 
-                  className="font-serif text-2xl mb-2"
-                  style={{ color: form.primary_color }}
-                >
-                  {form.name || 'Mijn Restaurant'}
-                </h3>
+                <div className="flex items-center gap-3 mb-4">
+                  {form.logo_url && (
+                    <img 
+                      src={form.logo_url} 
+                      alt="Logo" 
+                      className="h-10 w-auto object-contain"
+                    />
+                  )}
+                  <h3 
+                    className="font-serif text-2xl"
+                    style={{ color: form.primary_color }}
+                  >
+                    {form.name || 'Mijn Restaurant'}
+                  </h3>
+                </div>
                 <button
                   type="button"
                   className="px-6 py-2 rounded-full text-white font-medium"

@@ -47,6 +47,24 @@ export const settingsAPI = {
   update: (data) => api.put('/settings', data),
 };
 
+// Upload APIs
+export const uploadAPI = {
+  uploadLogo: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/upload/logo', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  uploadImage: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/upload/image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+};
+
 // Category APIs
 export const categoryAPI = {
   getAll: () => api.get('/categories'),

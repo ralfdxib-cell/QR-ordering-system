@@ -1,5 +1,6 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, status
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, UploadFile, File
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -12,9 +13,14 @@ import uuid
 from datetime import datetime, timezone
 import jwt
 import bcrypt
+import shutil
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
+
+# Create uploads directory
+UPLOADS_DIR = ROOT_DIR / 'uploads'
+UPLOADS_DIR.mkdir(exist_ok=True)
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
@@ -298,6 +304,58 @@ async def update_settings(data: RestaurantSettingsUpdate, _: dict = Depends(get_
     
     await db.settings.update_one({}, {"$set": update_data}, upsert=True)
     return await get_settings()
+
+# ============ FILE UPLOAD ============
+
+@api_router.post("/upload/logo")
+async def upload_logo(file: UploadFile = File(...), _: dict = Depends(get_current_admin)):
+    """Upload a logo image file"""
+    # Validate file type
+    allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml']
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Ongeldig bestandstype. Gebruik JPG, PNG, GIF, WebP of SVG.")
+    
+    # Generate unique filename
+    file_ext = file.filename.split('.')[-1] if '.' in file.filename else 'png'
+    unique_filename = f"logo_{uuid.uuid4().hex[:8]}.{file_ext}"
+    file_path = UPLOADS_DIR / unique_filename
+    
+    # Save file
+    try:
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Bestand opslaan mislukt: {str(e)}")
+    
+    # Return the URL path
+    logo_url = f"/uploads/{unique_filename}"
+    
+    return {"logo_url": logo_url, "filename": unique_filename}
+
+@api_router.post("/upload/image")
+async def upload_image(file: UploadFile = File(...), _: dict = Depends(get_current_admin)):
+    """Upload a general image file (for menu items, categories)"""
+    # Validate file type
+    allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Ongeldig bestandstype. Gebruik JPG, PNG, GIF of WebP.")
+    
+    # Generate unique filename
+    file_ext = file.filename.split('.')[-1] if '.' in file.filename else 'png'
+    unique_filename = f"img_{uuid.uuid4().hex[:8]}.{file_ext}"
+    file_path = UPLOADS_DIR / unique_filename
+    
+    # Save file
+    try:
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Bestand opslaan mislukt: {str(e)}")
+    
+    # Return the URL path
+    image_url = f"/uploads/{unique_filename}"
+    
+    return {"image_url": image_url, "filename": unique_filename}
 
 # ============ CATEGORY ROUTES ============
 
@@ -620,6 +678,9 @@ async def seed_data():
 
 # Include the router in the main app
 app.include_router(api_router)
+
+# Mount static files for uploads
+app.mount("/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
 app.add_middleware(
     CORSMiddleware,
