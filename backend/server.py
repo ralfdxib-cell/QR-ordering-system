@@ -327,8 +327,8 @@ async def upload_logo(file: UploadFile = File(...), _: dict = Depends(get_curren
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Bestand opslaan mislukt: {str(e)}")
     
-    # Return the URL path
-    logo_url = f"/uploads/{unique_filename}"
+    # Return the URL path (via /api/ for ingress routing)
+    logo_url = f"/api/uploads/{unique_filename}"
     
     return {"logo_url": logo_url, "filename": unique_filename}
 
@@ -352,8 +352,8 @@ async def upload_image(file: UploadFile = File(...), _: dict = Depends(get_curre
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Bestand opslaan mislukt: {str(e)}")
     
-    # Return the URL path
-    image_url = f"/uploads/{unique_filename}"
+    # Return the URL path (via /api/ for ingress routing)
+    image_url = f"/api/uploads/{unique_filename}"
     
     return {"image_url": image_url, "filename": unique_filename}
 
@@ -679,8 +679,8 @@ async def seed_data():
 # Include the router in the main app
 app.include_router(api_router)
 
-# Mount static files for uploads
-app.mount("/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
+# Mount static files for uploads under /api/uploads to work with ingress
+app.mount("/api/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
 app.add_middleware(
     CORSMiddleware,
