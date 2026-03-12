@@ -139,6 +139,12 @@ export default function MenuManagement() {
   };
 
   const handleCategorySubmit = async () => {
+    // Validatie
+    if (!categoryForm.name.trim()) {
+      toast.error('Vul een naam in');
+      return;
+    }
+
     try {
       if (editingCategory) {
         await categoryAPI.update(editingCategory.id, categoryForm);
@@ -203,6 +209,20 @@ export default function MenuManagement() {
   };
 
   const handleItemSubmit = async () => {
+    // Validatie
+    if (!itemForm.category_id) {
+      toast.error('Selecteer een categorie');
+      return;
+    }
+    if (!itemForm.name.trim()) {
+      toast.error('Vul een naam in');
+      return;
+    }
+    if (!itemForm.price || isNaN(parseFloat(itemForm.price))) {
+      toast.error('Vul een geldige prijs in');
+      return;
+    }
+
     try {
       const data = {
         ...itemForm,
