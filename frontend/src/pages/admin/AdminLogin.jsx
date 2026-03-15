@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { authAPI } from '../../lib/api';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -9,12 +9,10 @@ import { Loader2, UtensilsCrossed, ArrowLeft } from 'lucide-react';
 
 export default function AdminLogin() {
   const navigate = useNavigate();
-  const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    name: '',
   });
 
   const handleSubmit = async (e) => {
@@ -22,24 +20,25 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
-      if (isLogin) {
-        const response = await authAPI.login({
-          email: formData.email,
-          password: formData.password,
-        });
-        localStorage.setItem('admin_token', response.data.token);
-        localStorage.setItem('admin_user', JSON.stringify(response.data.admin));
-        toast.success('Welkom terug!');
-        navigate('/admin');
+      const response = await authAPI.login({
+        email: formData.email,
+        password: formData.password,
+      });
+      
+      const { token, admin, tenant } = response.data;
+      
+      localStorage.setItem('admin_token', token);
+      localStorage.setItem('admin_user', JSON.stringify(admin));
+      if (tenant) {
+        localStorage.setItem('tenant', JSON.stringify(tenant));
+      }
+      
+      toast.success('Welkom terug!');
+      
+      // Redirect platform admin to platform dashboard
+      if (admin.is_platform_admin) {
+        navigate('/platform');
       } else {
-        const response = await authAPI.register({
-          email: formData.email,
-          password: formData.password,
-          name: formData.name,
-        });
-        localStorage.setItem('admin_token', response.data.token);
-        localStorage.setItem('admin_user', JSON.stringify(response.data.admin));
-        toast.success('Account succesvol aangemaakt!');
         navigate('/admin');
       }
     } catch (error) {
@@ -73,33 +72,15 @@ export default function AdminLogin() {
               <UtensilsCrossed className="w-8 h-8 text-primary" />
             </div>
             <h1 className="font-serif text-3xl font-medium text-foreground">
-              {isLogin ? 'Beheerder Login' : 'Account Aanmaken'}
+              Beheerder Login
             </h1>
             <p className="text-muted-foreground mt-2">
-              {isLogin 
-                ? 'Log in om uw restaurant te beheren' 
-                : 'Stel uw restaurant dashboard in'}
+              Log in om uw restaurant te beheren
             </p>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
-            {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="name">Restaurant Naam</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="Voer restaurant naam in"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required={!isLogin}
-                  className="h-12 rounded-lg"
-                  data-testid="name-input"
-                />
-              </div>
-            )}
-
             <div className="space-y-2">
               <Label htmlFor="email">E-mail</Label>
               <Input
@@ -138,26 +119,24 @@ export default function AdminLogin() {
               {loading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                  {isLogin ? 'Inloggen...' : 'Account aanmaken...'}
+                  Inloggen...
                 </>
               ) : (
-                isLogin ? 'Inloggen' : 'Account Aanmaken'
+                'Inloggen'
               )}
             </Button>
           </form>
 
-          {/* Toggle */}
+          {/* Register Link */}
           <div className="text-center">
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              data-testid="toggle-auth-btn"
+            <span className="text-sm text-muted-foreground">Nog geen restaurant? </span>
+            <Link 
+              to="/register"
+              className="text-sm text-primary hover:underline font-medium"
+              data-testid="register-link"
             >
-              {isLogin 
-                ? "Nog geen account? Registreer" 
-                : 'Al een account? Log in'}
-            </button>
+              Registreer nu gratis
+            </Link>
           </div>
         </div>
       </div>

@@ -4,16 +4,17 @@ import { tableAPI, seedAPI } from '../../lib/api';
 import { useCart } from '../../context/CartContext';
 import { useSettings } from '../../context/SettingsContext';
 import { Button } from '../../components/ui/button';
-import { Loader2, UtensilsCrossed, AlertCircle, Sparkles } from 'lucide-react';
+import { Loader2, UtensilsCrossed, AlertCircle, Sparkles, Store, ArrowRight } from 'lucide-react';
 
 export default function TableLanding() {
   const { qrCode } = useParams();
   const navigate = useNavigate();
-  const { setCurrentTable } = useCart();
-  const { settings } = useSettings();
+  const { setCurrentTable, setCurrentTenant } = useCart();
+  const { settings, setSettings } = useSettings();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [table, setTable] = useState(null);
+  const [tenantInfo, setTenantInfo] = useState(null);
 
   useEffect(() => {
     if (qrCode) {
@@ -26,10 +27,26 @@ export default function TableLanding() {
   const fetchTable = async () => {
     try {
       const response = await tableAPI.getByQR(qrCode);
-      setTable(response.data);
-      setCurrentTable(response.data);
+      const { table: tableData, tenant } = response.data;
+      
+      setTable(tableData);
+      setTenantInfo(tenant);
+      setCurrentTable(tableData);
+      setCurrentTenant(tenant);
+      
+      // Update settings with tenant branding
+      if (tenant) {
+        setSettings({
+          name: tenant.name,
+          logo_url: tenant.logo_url,
+          primary_color: tenant.primary_color,
+          secondary_color: tenant.secondary_color,
+          currency_symbol: tenant.currency_symbol
+        });
+      }
+      
       setTimeout(() => {
-        navigate('/menu');
+        navigate(`/r/${tenant.slug}/menu`);
       }, 2000);
     } catch (err) {
       setError('Tafel niet gevonden. Scan een geldige QR-code.');
@@ -41,13 +58,8 @@ export default function TableLanding() {
     try {
       setLoading(true);
       await seedAPI.seed();
-      const tablesResponse = await tableAPI.getAll();
-      if (tablesResponse.data.length > 0) {
-        const firstTable = tablesResponse.data[0];
-        setTable(firstTable);
-        setCurrentTable(firstTable);
-        navigate('/menu');
-      }
+      // Navigate to demo restaurant
+      navigate('/r/demo-restaurant/menu?demo=true');
     } catch (err) {
       console.error('Error entering demo mode:', err);
       setError('Demo modus kon niet worden gestart. Probeer het opnieuw.');
@@ -76,7 +88,7 @@ export default function TableLanding() {
     );
   }
 
-  if (table) {
+  if (table && tenantInfo) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
         <div className="text-center space-y-6 animate-slide-up">
@@ -85,7 +97,7 @@ export default function TableLanding() {
           </div>
           <div>
             <h1 className="font-serif text-4xl font-medium text-foreground mb-2">
-              Welkom bij {settings.name}!
+              Welkom bij {tenantInfo.name}!
             </h1>
             <p className="text-xl text-muted-foreground">
               U zit aan <span className="font-semibold text-foreground">Tafel {table.table_number}</span>
@@ -124,6 +136,7 @@ export default function TableLanding() {
     );
   }
 
+  // Landing page - show both customer and restaurant owner options
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -135,43 +148,27 @@ export default function TableLanding() {
       >
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative h-full flex flex-col items-center justify-center text-center px-6">
-          {settings.logo_url && (
-            <img 
-              src={settings.logo_url} 
-              alt={settings.name} 
-              className="h-16 w-auto object-contain mb-6 animate-fade-in"
-            />
-          )}
           <h1 className="font-serif text-5xl md:text-6xl font-medium text-white mb-4 animate-slide-up">
-            {settings.name}
+            QR Bestelsysteem
           </h1>
           <p className="text-lg text-white/80 max-w-md animate-fade-in">
-            Scan de QR-code op uw tafel om het menu te bekijken en te bestellen
+            Het slimme bestelsysteem voor restaurants
           </p>
         </div>
       </div>
 
       {/* Content Section */}
       <div className="px-6 py-12 max-w-lg mx-auto text-center space-y-8">
+        {/* For Customers */}
         <div className="space-y-4">
           <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
             <UtensilsCrossed className="w-8 h-8 text-primary" />
           </div>
           <h2 className="font-serif text-2xl font-medium text-foreground">
-            Hoe Bestellen
+            Gast? Scan de QR-code
           </h2>
-          <div className="space-y-3 text-muted-foreground">
-            <p>1. Scan de QR-code op uw tafel</p>
-            <p>2. Bekijk ons heerlijke menu</p>
-            <p>3. Voeg items toe aan uw winkelwagen</p>
-            <p>4. Plaats uw bestelling</p>
-            <p>5. Betaal bij de kassa wanneer klaar</p>
-          </div>
-        </div>
-
-        <div className="pt-6 border-t border-border space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Voor demonstratiedoeleinden kunt u zonder scannen bestellen:
+          <p className="text-muted-foreground">
+            Scan de QR-code op uw tafel om het menu te bekijken en te bestellen
           </p>
           <Button 
             onClick={handleDemoMode}
@@ -189,28 +186,50 @@ export default function TableLanding() {
           </Button>
         </div>
 
-        <div className="pt-6 border-t border-border space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Restauranteigenaar? Open het beheerpaneel:
+        {/* Divider */}
+        <div className="relative py-4">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-border"></div>
+          </div>
+          <div className="relative flex justify-center">
+            <span className="bg-background px-4 text-sm text-muted-foreground">of</span>
+          </div>
+        </div>
+
+        {/* For Restaurant Owners */}
+        <div className="space-y-4 p-6 bg-gradient-to-br from-[#5A6B5D]/5 to-[#5A6B5D]/10 rounded-2xl border border-[#5A6B5D]/20">
+          <div className="w-16 h-16 mx-auto rounded-full bg-[#5A6B5D] flex items-center justify-center">
+            <Store className="w-8 h-8 text-white" />
+          </div>
+          <h2 className="font-serif text-2xl font-medium text-foreground">
+            Restaurant Eigenaar?
+          </h2>
+          <p className="text-muted-foreground">
+            Start vandaag nog met het digitaliseren van uw bestellingen
           </p>
-          <div className="flex gap-3 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button 
+              onClick={() => navigate('/register')}
+              className="rounded-full px-6 gap-2 bg-[#5A6B5D] hover:bg-[#4a5b4d]"
+              size="lg"
+              data-testid="register-btn"
+            >
+              Gratis Registreren
+              <ArrowRight className="w-4 h-4" />
+            </Button>
             <Button 
               variant="outline"
               onClick={() => navigate('/admin/login')}
-              className="rounded-full"
+              className="rounded-full px-6"
+              size="lg"
               data-testid="admin-login-btn"
             >
-              Beheerder Login
-            </Button>
-            <Button 
-              variant="outline"
-              onClick={() => navigate('/kitchen')}
-              className="rounded-full"
-              data-testid="kitchen-btn"
-            >
-              Keuken Display
+              Inloggen
             </Button>
           </div>
+          <p className="text-xs text-muted-foreground">
+            14 dagen gratis proefperiode - Geen creditcard nodig
+          </p>
         </div>
       </div>
     </div>

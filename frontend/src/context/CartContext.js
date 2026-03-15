@@ -6,11 +6,16 @@ const CartContext = createContext();
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
   const [table, setTable] = useState(null);
+  const [tenant, setTenant] = useState(null);
 
-  // Load cart and table from localStorage on mount
+  // Load cart, table, and tenant from localStorage on mount
   useEffect(() => {
     setCart(storage.getCart());
     setTable(storage.getTable());
+    const storedTenant = localStorage.getItem('current_tenant');
+    if (storedTenant) {
+      setTenant(JSON.parse(storedTenant));
+    }
   }, []);
 
   // Save cart to localStorage whenever it changes
@@ -24,6 +29,13 @@ export function CartProvider({ children }) {
       storage.setTable(table);
     }
   }, [table]);
+
+  // Save tenant to localStorage whenever it changes
+  useEffect(() => {
+    if (tenant) {
+      localStorage.setItem('current_tenant', JSON.stringify(tenant));
+    }
+  }, [tenant]);
 
   // Add item to cart
   const addToCart = (item, quantity = 1, selectedModifiers = [], specialInstructions = '') => {
@@ -85,10 +97,21 @@ export function CartProvider({ children }) {
     setTable(tableData);
   };
 
+  // Set current tenant
+  const setCurrentTenant = (tenantData) => {
+    setTenant(tenantData);
+  };
+
   // Clear table
   const clearTable = () => {
     setTable(null);
     storage.clearTable();
+  };
+
+  // Clear tenant
+  const clearTenant = () => {
+    setTenant(null);
+    localStorage.removeItem('current_tenant');
   };
 
   // Calculate cart total
@@ -104,12 +127,15 @@ export function CartProvider({ children }) {
   const value = {
     cart,
     table,
+    tenant,
     addToCart,
     updateQuantity,
     removeFromCart,
     clearCart,
     setCurrentTable,
+    setCurrentTenant,
     clearTable,
+    clearTenant,
     getCartTotal,
     getCartCount,
   };

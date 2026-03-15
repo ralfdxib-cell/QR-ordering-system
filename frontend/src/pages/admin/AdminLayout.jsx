@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useSettings } from '../../context/SettingsContext';
 import { Button } from '../../components/ui/button';
+import { Badge } from '../../components/ui/badge';
 import { 
   LayoutDashboard, 
   UtensilsCrossed, 
@@ -11,7 +12,8 @@ import {
   LogOut,
   Menu,
   X,
-  ChefHat
+  ChefHat,
+  ExternalLink
 } from 'lucide-react';
 
 const navItems = [
@@ -25,13 +27,15 @@ const navItems = [
 export default function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { settings } = useSettings();
+  const { settings, fetchSettings } = useSettings();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [admin, setAdmin] = useState(null);
+  const [tenant, setTenant] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('admin_token');
     const user = localStorage.getItem('admin_user');
+    const tenantData = localStorage.getItem('tenant');
     
     if (!token) {
       navigate('/admin/login');
@@ -39,13 +43,28 @@ export default function AdminLayout() {
     }
 
     if (user) {
-      setAdmin(JSON.parse(user));
+      const userData = JSON.parse(user);
+      setAdmin(userData);
+      
+      // Redirect platform admin to platform dashboard
+      if (userData.is_platform_admin) {
+        navigate('/platform');
+        return;
+      }
     }
+
+    if (tenantData) {
+      setTenant(JSON.parse(tenantData));
+    }
+
+    // Fetch settings for this tenant
+    fetchSettings();
   }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem('admin_token');
     localStorage.removeItem('admin_user');
+    localStorage.removeItem('tenant');
     navigate('/admin/login');
   };
 
@@ -54,6 +73,12 @@ export default function AdminLayout() {
       return location.pathname === path;
     }
     return location.pathname.startsWith(path);
+  };
+
+  const openCustomerView = () => {
+    if (tenant?.slug) {
+      window.open(`/r/${tenant.slug}/menu`, '_blank');
+    }
   };
 
   return (
@@ -97,7 +122,7 @@ export default function AdminLayout() {
             <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
               <UtensilsCrossed className="w-4 h-4 text-primary" />
             </div>
-            <span className="font-serif font-medium text-foreground">{settings.name}</span>
+            <span className="font-serif font-medium text-foreground truncate">{settings.name}</span>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
@@ -107,6 +132,23 @@ export default function AdminLayout() {
             <X className="w-4 h-4" />
           </button>
         </div>
+
+        {/* Tenant Info */}
+        {tenant && (
+          <div className="px-4 py-3 border-b border-border">
+            <div className="flex items-center justify-between">
+              <code className="text-xs bg-secondary px-2 py-1 rounded">/r/{tenant.slug}</code>
+              <button
+                onClick={openCustomerView}
+                className="text-xs text-primary hover:underline flex items-center gap-1"
+                data-testid="view-menu-link"
+              >
+                Bekijk Menu
+                <ExternalLink className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Navigation */}
         <nav className="p-4 space-y-1">

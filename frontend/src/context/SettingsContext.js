@@ -65,7 +65,8 @@ export function SettingsProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchSettings();
+    // Don't auto-fetch on mount - let components fetch based on context
+    setLoading(false);
   }, []);
 
   // Apply colors when settings change
@@ -79,10 +80,22 @@ export function SettingsProvider({ children }) {
     try {
       const response = await settingsAPI.get();
       setSettings(response.data);
+      return response.data;
     } catch (error) {
       console.error('Error fetching settings:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPublicSettings = async (slug) => {
+    try {
+      const response = await settingsAPI.getPublic(slug);
+      setSettings(response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching public settings:', error);
+      throw error;
     }
   };
 
@@ -101,8 +114,10 @@ export function SettingsProvider({ children }) {
 
   const value = {
     settings,
+    setSettings,
     loading,
     fetchSettings,
+    fetchPublicSettings,
     updateSettings,
   };
 

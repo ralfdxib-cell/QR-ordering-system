@@ -1,17 +1,25 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useSettings } from '../../context/SettingsContext';
 import { uploadAPI } from '../../lib/api';
+import api from '../../lib/api';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
+import { Badge } from '../../components/ui/badge';
 import { toast } from 'sonner';
-import { Loader2, Palette, DollarSign, ImageIcon, Save, Upload, X, Image } from 'lucide-react';
+import { Loader2, Palette, DollarSign, ImageIcon, Save, Upload, X, Image, CreditCard, Check, Crown, Zap, Building2 } from 'lucide-react';
 
 export default function AdminSettings() {
+  const [searchParams] = useSearchParams();
   const { settings, updateSettings, loading: settingsLoading } = useSettings();
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [subscriptionPlans, setSubscriptionPlans] = useState({});
+  const [loadingPlans, setLoadingPlans] = useState(true);
+  const [processingPayment, setProcessingPayment] = useState(false);
+  const [tenant, setTenant] = useState(null);
   const fileInputRef = useRef(null);
   const [form, setForm] = useState({
     name: settings.name || '',
@@ -22,8 +30,93 @@ export default function AdminSettings() {
     currency_symbol: settings.currency_symbol || '€',
   });
 
+  // Load tenant and subscription plans
+  useEffect(() => {
+    const storedTenant = localStorage.getItem('tenant');
+    if (storedTenant) {
+      setTenant(JSON.parse(storedTenant));
+    }
+    loadSubscriptionPlans();
+  }, []);
+
+  // Check for payment status in URL
+  useEffect(() => {
+    const sessionId = searchParams.get('session_id');
+    const paymentStatus = searchParams.get('payment');
+    
+    if (sessionId && paymentStatus === 'success') {
+      pollPaymentStatus(sessionId);
+    } else if (paymentStatus === 'cancelled') {
+      toast.info('Betaling geannuleerd');
+    }
+  }, [searchParams]);
+
+  const loadSubscriptionPlans = async () => {
+    try {
+      const response = await api.get('/subscription/plans');
+      setSubscriptionPlans(response.data.plans);
+    } catch (error) {
+      console.error('Error loading plans:', error);
+    } finally {
+      setLoadingPlans(false);
+    }
+  };
+
+  const pollPaymentStatus = async (sessionId, attempts = 0) => {
+    const maxAttempts = 5;
+    const pollInterval = 2000;
+
+    if (attempts >= maxAttempts) {
+      toast.info('Betaling wordt verwerkt. Controleer uw email voor bevestiging.');
+      return;
+    }
+
+    try {
+      setProcessingPayment(true);
+      const response = await api.get(`/subscription/status/${sessionId}`);
+      
+      if (response.data.payment_status === 'paid') {
+        toast.success('Abonnement succesvol geactiveerd!');
+        // Refresh tenant data
+        const meResponse = await api.get('/auth/me');
+        if (meResponse.data.tenant) {
+          localStorage.setItem('tenant', JSON.stringify(meResponse.data.tenant));
+          setTenant(meResponse.data.tenant);
+        }
+        setProcessingPayment(false);
+        // Remove query params
+        window.history.replaceState({}, document.title, window.location.pathname);
+        return;
+      }
+
+      // Continue polling
+      setTimeout(() => pollPaymentStatus(sessionId, attempts + 1), pollInterval);
+    } catch (error) {
+      console.error('Error checking payment:', error);
+      setProcessingPayment(false);
+    }
+  };
+
+  const handleSubscribe = async (planId) => {
+    try {
+      setProcessingPayment(true);
+      const response = await api.post('/subscription/checkout', {
+        plan_id: planId,
+        origin_url: window.location.origin
+      });
+      
+      if (response.data.url) {
+        window.location.href = response.data.url;
+      }
+    } catch (error) {
+      console.error('Error creating checkout:', error);
+      toast.error('Kon checkout niet starten');
+      setProcessingPayment(false);
+    }
+  };
+
   // Update form when settings load
-  React.useEffect(() => {
+  useEffect(() => {
     if (!settingsLoading) {
       setForm({
         name: settings.name || '',
@@ -101,6 +194,96 @@ export default function AdminSettings() {
         <h1 className="font-serif text-3xl font-medium text-foreground">Instellingen</h1>
         <p className="text-muted-foreground">Pas de uitstraling van uw restaurant aan</p>
       </div>
+
+      {/* Subscription Status */}
+      <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-transparent">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CreditCard className="w-5 h-5" />
+            Abonnement
+          </CardTitle>
+          <CardDescription>Beheer uw abonnement en facturen</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {/* Current Status */}
+          <div className="mb-6 p-4 bg-card rounded-lg border">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-muted-foreground">Huidige status</span>
+              <Badge className={
+                tenant?.subscription_status === 'active' ? 'bg-green-100 text-green-800' :
+                tenant?.subscription_status === 'trial' ? 'bg-blue-100 text-blue-800' :
+                'bg-gray-100 text-gray-800'
+              }>
+                {tenant?.subscription_status === 'active' ? 'Actief' :
+                 tenant?.subscription_status === 'trial' ? 'Proefperiode' :
+                 tenant?.subscription_status || 'Onbekend'}
+              </Badge>
+            </div>
+            {tenant?.subscription_plan && tenant.subscription_status === 'active' && (
+              <p className="text-sm">
+                Plan: <strong>{subscriptionPlans[tenant.subscription_plan]?.name || tenant.subscription_plan}</strong>
+              </p>
+            )}
+          </div>
+
+          {/* Subscription Plans */}
+          <div className="grid md:grid-cols-3 gap-4">
+            {Object.entries(subscriptionPlans).map(([planId, plan]) => {
+              const isCurrentPlan = tenant?.subscription_plan === planId && tenant?.subscription_status === 'active';
+              const Icon = planId === 'basic' ? Zap : planId === 'pro' ? Crown : Building2;
+              
+              return (
+                <div 
+                  key={planId}
+                  className={`relative p-4 rounded-lg border-2 transition-all ${
+                    isCurrentPlan ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+                  } ${planId === 'pro' ? 'md:scale-105 shadow-lg' : ''}`}
+                >
+                  {planId === 'pro' && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                      <Badge className="bg-primary text-primary-foreground">Populair</Badge>
+                    </div>
+                  )}
+                  
+                  <div className="text-center mb-4">
+                    <Icon className="w-8 h-8 mx-auto mb-2 text-primary" />
+                    <h3 className="font-bold text-lg">{plan.name}</h3>
+                    <div className="mt-2">
+                      <span className="text-3xl font-bold">€{plan.price}</span>
+                      <span className="text-muted-foreground">/maand</span>
+                    </div>
+                  </div>
+                  
+                  <ul className="space-y-2 mb-4">
+                    {plan.features?.map((feature, idx) => (
+                      <li key={idx} className="flex items-center gap-2 text-sm">
+                        <Check className="w-4 h-4 text-green-500 shrink-0" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                  
+                  <Button
+                    className="w-full"
+                    variant={isCurrentPlan ? "outline" : "default"}
+                    disabled={isCurrentPlan || processingPayment || loadingPlans}
+                    onClick={() => handleSubscribe(planId)}
+                    data-testid={`subscribe-${planId}-btn`}
+                  >
+                    {processingPayment ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : isCurrentPlan ? (
+                      'Huidige Plan'
+                    ) : (
+                      'Abonneren'
+                    )}
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Restaurant Info */}
