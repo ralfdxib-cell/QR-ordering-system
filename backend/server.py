@@ -1262,7 +1262,7 @@ app.include_router(api_router)
 app.mount("/api/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
 # ============ STRIPE SUBSCRIPTION ROUTES ============
-from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionRequest
+# from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionRequest
 
 # Subscription plans (fixed pricing)
 SUBSCRIPTION_PLANS = {
@@ -1442,8 +1442,8 @@ async def handle_stripe_webhook(request: Request):
 
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://localhost:3001"],  # frontend URL
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
     allow_methods=["*"],
     allow_headers=["*"],
 )
