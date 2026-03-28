@@ -30,6 +30,7 @@ import Register from "./pages/auth/Register";
 
 // Platform Admin Pages
 import PlatformDashboard from "./pages/platform/PlatformDashboard";
+import PlatformLogin from "./pages/platform/PlatformLogin";
 
 function App() {
   return (
@@ -71,6 +72,7 @@ function App() {
 
               {/* Platform Admin Routes */}
               <Route path="/platform" element={<PlatformDashboard />} />
+              <Route path="/platform/login" element={<PlatformLogin />} />
             </Routes>
           </BrowserRouter>
           <Toaster position="top-center" richColors />

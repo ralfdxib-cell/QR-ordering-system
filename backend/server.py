@@ -35,6 +35,11 @@ JWT_ALGORITHM = "HS256"
 # Platform admin secret (for super admin access)
 PLATFORM_ADMIN_SECRET = os.environ.get('PLATFORM_ADMIN_SECRET', 'super-admin-secret-2024')
 
+# Platform admin credentials (auto-created on startup)
+PLATFORM_ADMIN_EMAIL = os.environ.get('PLATFORM_ADMIN_EMAIL', 'superadmin@platform.com')
+PLATFORM_ADMIN_PASSWORD = os.environ.get('PLATFORM_ADMIN_PASSWORD', 'Admin1234!')
+PLATFORM_ADMIN_NAME = os.environ.get('PLATFORM_ADMIN_NAME', 'Super Admin')
+
 # Create the main app
 app = FastAPI(title="Restaurant QR Ordering System - Multi-Tenant SaaS")
 
@@ -309,7 +314,7 @@ def create_token(user_id: str, email: str, tenant_id: str = None, is_platform_ad
         "email": email,
         "tenant_id": tenant_id,
         "is_platform_admin": is_platform_admin,
-        "exp": datetime.now(timezone.utc).timestamp() + 86400 * 7  # 7 days
+        "exp": datetime.now(timezone.utc).timestamp() + 1800  # 30 minutes
     }
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
@@ -343,6 +348,8 @@ async def get_tenant_from_slug(slug: str) -> dict:
     tenant = await db.tenants.find_one({"slug": slug, "is_active": True}, {"_id": 0})
     if not tenant:
         raise HTTPException(status_code=404, detail="Restaurant niet gevonden")
+    if tenant.get('subscription_status') == 'suspended':
+        raise HTTPException(status_code=403, detail="Dit restaurant is tijdelijk niet beschikbaar.")
     return tenant
 
 async def verify_tenant_access(current_admin: dict, tenant_id: str):
@@ -542,11 +549,22 @@ async def login_admin(data: AdminLogin):
     tenant_id = admin.get('tenant_id')
     is_platform_admin = admin.get('is_platform_admin', False)
     
-    # Get tenant info if not platform admin
+    # Get tenant info and check account status
     tenant_info = None
     if tenant_id and tenant_id != "platform":
         tenant = await db.tenants.find_one({"id": tenant_id}, {"_id": 0})
         if tenant:
+            # Block login for suspended or inactive tenants
+            if tenant.get('subscription_status') == 'suspended':
+                raise HTTPException(
+                    status_code=403,
+                    detail="Your account has been suspended. Please contact support."
+                )
+            if not tenant.get('is_active', True):
+                raise HTTPException(
+                    status_code=403,
+                    detail="Your account is inactive. Please contact support."
+                )
             tenant_info = {"id": tenant['id'], "slug": tenant['slug'], "name": tenant['name']}
     
     token = create_token(admin['id'], admin['email'], tenant_id, is_platform_admin)
@@ -1260,6 +1278,26 @@ app.include_router(api_router)
 
 # Mount static files for uploads under /api/uploads to work with ingress
 app.mount("/api/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
+
+@app.on_event("startup")
+async def create_platform_admin_on_startup():
+    """Auto-create the platform admin account from env vars if it doesn't exist."""
+    existing = await db.admins.find_one({"email": PLATFORM_ADMIN_EMAIL}, {"_id": 0})
+    if not existing:
+        admin = AdminUser(
+            tenant_id="platform",
+            email=PLATFORM_ADMIN_EMAIL,
+            password_hash=hash_password(PLATFORM_ADMIN_PASSWORD),
+            name=PLATFORM_ADMIN_NAME,
+            role="platform_admin",
+            is_platform_admin=True
+        )
+        doc = admin.model_dump()
+        doc['created_at'] = doc['created_at'].isoformat()
+        await db.admins.insert_one(doc)
+        logging.info(f"Platform admin auto-created: {PLATFORM_ADMIN_EMAIL}")
+    else:
+        logging.info(f"Platform admin already exists: {PLATFORM_ADMIN_EMAIL}")
 
 # ============ STRIPE SUBSCRIPTION ROUTES ============
 # from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionRequest

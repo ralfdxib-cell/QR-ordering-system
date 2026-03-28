@@ -26,7 +26,7 @@ export default function PlatformDashboard() {
     const user = JSON.parse(localStorage.getItem('admin_user') || '{}');
     if (!user.is_platform_admin) {
       toast.error('Geen toegang tot platform beheer');
-      navigate('/admin/login');
+      navigate('/platform/login');
       return;
     }
     
@@ -69,7 +69,7 @@ export default function PlatformDashboard() {
     localStorage.removeItem('admin_token');
     localStorage.removeItem('admin_user');
     localStorage.removeItem('tenant');
-    navigate('/admin/login');
+    navigate('/platform/login');
   };
 
   const getStatusBadge = (status) => {
